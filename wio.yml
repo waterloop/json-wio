@@ -1,0 +1,35 @@
+pkg:
+  name: json-wio
+  description: JSON library for wio
+  url: https://github.com/waterloop/json-wio.git
+  version: 1.0.0
+  author: Jeff Niu
+  contributors: []
+  organization: Waterloop
+  keywords:
+  - wio
+  - c
+  - c++
+  - json
+  - waterloop
+  license: MIT
+  platform: ALL
+  framework:
+  - ALL
+  board:
+  - ALL
+  compile_flags: []
+  ide: none
+
+targets:
+  default: tests
+  create:
+    tests:
+      board: uno
+      compile_flags: []
+
+dependencies:
+  wlib-wio:
+    version: latest
+    vendor: false
+    compile_flags: []
