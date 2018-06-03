@@ -1,14 +1,6 @@
 #include <wlib/Json/JsonUtil.h>
 #include <wlib/Json/JsonString.h>
 
-#define STR_NULL    "null"
-#define STR_TRUE    "true"
-#define STR_FALSE   "false"
-
-#define STR_SIZE_NULL   4
-#define STR_SIZE_TRUE   4
-#define STR_SIZE_FALSE  5
-
 using namespace wlp;
 
 bool json_string::contents_are_null() {
@@ -35,6 +27,20 @@ bool json_string::contents_are_int() {
 
 bool json_string::contents_are_float() {
     return string_is_float(static_cast<const char *>(m_data));
+}
+
+bool json_string::contents_are_true() {
+    const char *str = static_cast<const char *>(m_data);
+    return 
+        m_size == STR_SIZE_TRUE &&
+        strcmp(str, STR_TRUE) == 0;
+}
+
+bool json_string::contents_are_false() {
+    const char *str = static_cast<const char *>(m_data);
+    return
+        m_size == STR_SIZE_FALSE &&
+        strcmp(str, STR_FALSE) == 0;
 }
 
 bool json_string::contents_are_array() {

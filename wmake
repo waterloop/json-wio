@@ -50,6 +50,11 @@ _run() {
     ./cmake-build-debug/unit
 }
 
+_test() {
+    _build
+    _run
+}
+
 _simple() {
     root_dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
     root_dir_name=$(basename "$root_dir")
@@ -66,6 +71,8 @@ _simple() {
         _reset
     elif [ "$1" == 'run' ] ; then
         _run
+    elif [ "$1" == 'test' ] ; then
+        _test
     else
         _print_help
     fi

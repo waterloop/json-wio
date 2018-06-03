@@ -1,10 +1,15 @@
 #ifndef __WLIB_JSON_JSONELEMENT_H__
 #define __WLIB_JSON_JSONELEMENT_H__
 
+#include <float.h>
+
 #include <wlib/string>
 #include <wlib/utility>
 
+#include <wlib/Json/JsonUtil.h>
 #include <wlib/Json/JsonType.h>
+
+#define data_assign(type, dat) (*reinterpret_cast<type *>((dat)))
 
 #define JSON_ELEMENT_CONVERTIBLE_TO_NULL()  \
 template<typename target_t>                 \
@@ -152,12 +157,14 @@ namespace wlp {
         explicit json_element(const dynamic_string &str);
         template<size_type string_size>
         explicit json_element(const static_string<string_size> &str) :
-            json_element(static_cast<const char *>(str.c_str()), string_size) {}
+            json_element(static_cast<const char *>(str.c_str()), str.length()) {}
 
         // type conversion
         bool is_null();
         bool is_bool();
         bool is_int();
+        bool is_signed_int();
+        bool is_unsigned_int();
         bool is_float();
         bool is_number();
         bool is_string();
@@ -198,10 +205,12 @@ namespace wlp {
         nullptr_t convert_to_null();
         bool convert_to_bool();
         template<typename c_str_t>
-        c_str_t convert_to_c_str() {
-            return static_cast<c_str_t>(m_data);
-        }
+        c_str_t convert_to_c_str();
         dynamic_string convert_to_dynamic_string();
+
+        void *data();
+        json_type type();
+        int size();
 
     protected:
         bool is_string_null();
@@ -211,12 +220,105 @@ namespace wlp {
         bool is_string_array();
         bool is_string_object();
 
+        static char s_str_null[STR_SIZE_NULL + 1];
+        static char s_str_true[STR_SIZE_TRUE + 1];
+        static char s_str_false[STR_SIZE_FALSE + 1];
+
         void *m_data;
+        dynamic_string m_str;
         json_type m_type;
         int m_size;
     };
 
+    template<typename c_str_t>
+    c_str_t json_element::convert_to_c_str() {       
+        if (is_null()) { return s_str_null; } 
+        else if (is_bool()) { 
+            return static_cast<c_str_t>(
+                data_assign(bool, m_data)
+                ? STR_TRUE : STR_FALSE);
+        } else if (is_signed_int()) {
+            static char strbuf[(8 * sizeof(long long) / 3) + 3]; 
+            int len = 0;
+            fprintf_t printer = s_type_printer[m_type];
+            switch (m_type) {
+            case TYPE_CHAR: 
+                len = printer(strbuf, data_assign(char, m_data));
+                break;
+            case TYPE_SIGNED_CHAR:
+                len = printer(strbuf, data_assign(signed char, m_data));
+                break;
+            case TYPE_SIGNED_SHORT:
+                len = printer(strbuf, data_assign(signed short, m_data));
+                break;
+            case TYPE_SIGNED_INT:
+                len = printer(strbuf, data_assign(signed int, m_data));
+                break;
+            case TYPE_SIGNED_LONG:
+                len = printer(strbuf, data_assign(signed long, m_data));
+                break;
+            case TYPE_SIGNED_LONG_LONG:
+                len = printer(strbuf, data_assign(signed long long, m_data));
+                break;
+            default:
+                break;
+            }
+            m_str.clear();
+            m_str.append(strbuf, len);
+            return static_cast<c_str_t>(m_str.c_str());
+        } else if (is_unsigned_int()) {
+            static char strbuf[(8 * sizeof(long long) / 3) + 3]; 
+            int len = 0;
+            fprintf_t printer = s_type_printer[m_type];
+            switch (m_type) {
+            case TYPE_UNSIGNED_CHAR:
+                len = printer(strbuf, data_assign(unsigned char, m_data));
+                break;
+            case TYPE_UNSIGNED_SHORT:
+                len = printer(strbuf, data_assign(unsigned short, m_data));
+                break;
+            case TYPE_UNSIGNED_INT:
+                len = printer(strbuf, data_assign(unsigned int, m_data));
+                break;
+            case TYPE_UNSIGNED_LONG:
+                len = printer(strbuf, data_assign(unsigned long, m_data));
+                break;
+            case TYPE_UNSIGNED_LONG_LONG:
+                len = printer(strbuf, data_assign(unsigned long long, m_data));
+                break;
+            default:
+                break;
+            }
+            m_str.clear();
+            m_str.append(strbuf, len);
+            return static_cast<c_str_t>(m_str.c_str());
+        } else if (is_float()) {
+            static char strbuf[10 + DBL_MAX_10_EXP];
+            int len = 0;
+            fprintf_t printer = s_type_printer[m_type];
+            switch (m_type) {
+            case TYPE_FLOAT:
+                len = printer(strbuf, data_assign(float, m_data));
+                break;
+            case TYPE_DOUBLE:
+                len = printer(strbuf, data_assign(double, m_data));
+                break;
+            case TYPE_LONG_DOUBLE:
+                len = printer(strbuf, data_assign(long double, m_data));
+                break;
+            default:
+                break;
+            }
+            m_str.clear();
+            m_str.append(strbuf, len);
+            return static_cast<c_str_t>(m_str.c_str());
+        } else if (is_string()) {
+            return reinterpret_cast<c_str_t>(m_data);
+        } else {
+            return nullptr;
+        }
+    }
+
 }
 
 #endif
-

@@ -35,7 +35,8 @@ namespace wlp {
         TYPE_LONG_DOUBLE,
         TYPE_JSON_STRING,
         TYPE_JSON_ARRAY,
-        TYPE_JSON_OBJECT
+        TYPE_JSON_OBJECT,
+        NUM_TYPES
     };
 
     template<json_type type>
@@ -79,6 +80,10 @@ namespace wlp {
             is_same<const char *, target_t>::value ||
             is_same<dynamic_string, target_t>::value;
     }
+
+    typedef int (*fprintf_t) (char *, ...);
+
+    extern fprintf_t s_type_printer[json_type::NUM_TYPES];
 
 }
 

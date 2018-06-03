@@ -9,6 +9,8 @@ namespace wlp {
     public:
         bool contents_are_null();
         bool contents_are_bool();
+        bool contents_are_true();
+        bool contents_are_false();
         bool contents_are_int();
         bool contents_are_float();
         bool contents_are_array();

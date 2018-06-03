@@ -5,7 +5,9 @@
 #include <wlib/Json/JsonString.h>
 #include <wlib/Json/JsonElement.h>
 
-#define data_assign(type, dat) (*reinterpret_cast<type *>((dat)))
+#define switch_size_cast(target_t, fill_t, data)    \
+case sizeof(fill_t):                                \
+    return static_cast<target_t>(*reinterpret_cast<fill_t *>(data));              
 #define JSON_ELEMENT_NUMBER_CTOR(type)  \
 json_element::json_element(type i) :    \
     m_data(malloc<type>()),             \
@@ -15,6 +17,10 @@ json_element::json_element(type i) :    \
 }
 
 using namespace wlp;
+
+char json_element::s_str_null[STR_SIZE_NULL + 1] = STR_NULL;
+char json_element::s_str_true[STR_SIZE_TRUE + 1] = STR_TRUE;
+char json_element::s_str_false[STR_SIZE_FALSE + 1] = STR_FALSE;
 
 json_element::~json_element() {
     if (m_type == TYPE_JSON_STRING) {
@@ -28,7 +34,7 @@ json_element::~json_element() {
 json_element::json_element(nullptr_t) :
     m_data(nullptr),
     m_type(TYPE_NULL),
-    m_size(0) {}
+    m_size(sizeof(nullptr_t)) {}
 
 JSON_ELEMENT_NUMBER_CTOR(bool)
 JSON_ELEMENT_NUMBER_CTOR(char)
@@ -76,6 +82,14 @@ bool json_element::is_bool() {
 
 bool json_element::is_int() {
     return TYPE_CHAR <= m_type && m_type <= TYPE_UNSIGNED_LONG_LONG;
+}
+
+bool json_element::is_signed_int() {
+    return TYPE_CHAR <= m_type && m_type <= TYPE_SIGNED_LONG_LONG;
+}
+
+bool json_element::is_unsigned_int() {
+    return TYPE_UNSIGNED_CHAR <= m_type && m_type <= TYPE_UNSIGNED_LONG_LONG;
 }
 
 bool json_element::is_float() {
@@ -146,9 +160,56 @@ nullptr_t json_element::convert_to_null() {
 }
 
 bool json_element::convert_to_bool() {
-    return data_assign(bool, m_data);
+    if (is_null()) {
+        return false;
+    } else if (is_bool()) {
+        return data_assign(bool, m_data);
+    } else if (is_signed_int()) {
+        switch (m_size) {
+            switch_size_cast(bool, char, m_data)
+            switch_size_cast(bool, short, m_data)
+            switch_size_cast(bool, int, m_data)
+            switch_size_cast(bool, long, m_data)
+#if __WLIB_LONG_LONG__
+            switch_size_cast(bool, long long, m_data)
+#endif
+        default:
+            return false;
+        }
+    } else if (is_unsigned_int()) {
+        switch (m_size) {
+            switch_size_cast(bool, unsigned char, m_data)
+            switch_size_cast(bool, unsigned short, m_data)
+            switch_size_cast(bool, unsigned int, m_data)
+            switch_size_cast(bool, unsigned long, m_data)
+#if __WLIB_LONG_LONG__
+            switch_size_cast(bool, unsigned long long, m_data)
+#endif
+        default:
+            return false;
+        }
+    } else if (is_float()) {
+        switch (m_size) {
+            switch_size_cast(bool, float, m_data)
+            switch_size_cast(bool, double, m_data)
+#if __WLIB_LONG_DOUBLE__
+            switch_size_cast(bool, long double, m_data)
+#endif
+        default:
+            return false;
+        }
+    } else if (is_string()) {
+        return reinterpret_cast<json_string *>(this)->contents_are_true();
+    } else {
+        return false;
+    }
 }
 
 dynamic_string json_element::convert_to_dynamic_string() {
-    return dynamic_string(static_cast<const char *>(m_data), m_size);
+    convert_to_c_str<char *>();
+    return m_str;
 }
+
+void *json_element::data() { return m_data; }
+json_type json_element::type() { return m_type; }
+int json_element::size() { return m_size; }
