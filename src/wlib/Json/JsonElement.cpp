@@ -7,14 +7,7 @@
 
 #define switch_size_cast(target_t, fill_t, data)    \
 case sizeof(fill_t):                                \
-    return static_cast<target_t>(*reinterpret_cast<fill_t *>(data));              
-#define JSON_ELEMENT_NUMBER_CTOR(type)  \
-json_element::json_element(type i) :    \
-    m_data(malloc<type>()),             \
-    m_type(type_info<type>::value),     \
-    m_size(sizeof(type)) {              \
-    data_assign(type, m_data) = i;      \
-}
+    return static_cast<target_t>(*reinterpret_cast<fill_t *>(data));
 
 using namespace wlp;
 
@@ -36,26 +29,10 @@ json_element::json_element(nullptr_t) :
     m_type(TYPE_NULL),
     m_size(sizeof(nullptr_t)) {}
 
-JSON_ELEMENT_NUMBER_CTOR(bool)
-JSON_ELEMENT_NUMBER_CTOR(char)
-JSON_ELEMENT_NUMBER_CTOR(signed char)
-JSON_ELEMENT_NUMBER_CTOR(signed short)
-JSON_ELEMENT_NUMBER_CTOR(signed int)
-JSON_ELEMENT_NUMBER_CTOR(signed long)
-JSON_ELEMENT_NUMBER_CTOR(signed long long)
-JSON_ELEMENT_NUMBER_CTOR(unsigned char)
-JSON_ELEMENT_NUMBER_CTOR(unsigned short)
-JSON_ELEMENT_NUMBER_CTOR(unsigned int)
-JSON_ELEMENT_NUMBER_CTOR(unsigned long)
-JSON_ELEMENT_NUMBER_CTOR(unsigned long long)
-JSON_ELEMENT_NUMBER_CTOR(float)
-JSON_ELEMENT_NUMBER_CTOR(double)
-JSON_ELEMENT_NUMBER_CTOR(long double)
-
-json_element::json_element(char *str) : 
+json_element::json_element(char *str) :
     json_element(static_cast<const char *>(str), strlen(str)) {}
 
-json_element::json_element(char *str, size_type size) : 
+json_element::json_element(char *str, size_type size) :
     json_element(static_cast<const char *>(str), size) {}
 
 json_element::json_element(const char *str) :
@@ -124,7 +101,7 @@ bool json_element::convertible_to(json_type type) {
     } else if (is_number()) {
         return TYPE_CHAR <= type <= TYPE_JSON_STRING;
     } else if (is_array()) {
-        return 
+        return
             type == TYPE_JSON_STRING ||
             type == TYPE_JSON_ARRAY;
     } else if (is_object()) {

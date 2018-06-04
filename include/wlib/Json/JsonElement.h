@@ -11,101 +11,6 @@
 
 #define data_assign(type, dat) (*reinterpret_cast<type *>((dat)))
 
-#define JSON_ELEMENT_CONVERTIBLE_TO_NULL()  \
-template<typename target_t>                 \
-typename enable_type_if<                    \
-    is_same<nullptr_t, target_t>::value,    \
-    bool>::type convertible_to() {          \
-    return is_null() || (is_string() &&     \
-        is_string_null()); }           
-
-#define JSON_ELEMENT_CONVERTIBLE_TO_BOOL()  \
-template<typename target_t>                 \
-typename enable_type_if<                    \
-    is_same<bool, target_t>::value,         \
-    bool>::type convertible_to() {          \
-    return is_null() || is_bool() ||        \
-        is_number() || (is_string() &&      \
-        (!m_size || is_string_bool())); }     
-
-#define JSON_ELEMENT_CONVERTIBLE_TO_INT()   \
-template<typename target_t>                 \
-typename enable_type_if<                    \
-    is_integral<target_t>::value &&         \
-    !is_same<bool, target_t>::value,        \
-    bool>::type convertible_to() {          \
-    return is_null() || is_bool() ||        \
-        is_int() || (is_string() &&         \
-        is_string_int()); }
-
-#define JSON_ELEMENT_CONVERTIBLE_TO_FLOAT() \
-template<typename target_t>                 \
-typename enable_type_if<                    \
-    is_floating_point<target_t>::value,     \
-    bool>::type convertible_to() {          \
-    return is_null() || is_bool() ||        \
-        is_number() || (is_string() && (    \
-        is_string_int() ||                  \
-        is_string_float())); }               
-
-#define JSON_ELEMENT_CONVERTIBLE_TO_STRING()    \
-template<typename target_t>                     \
-typename enable_type_if<                        \
-    is_string_type<target_t>(),                 \
-    bool>::type convertible_to() {              \
-    return true; }      
-
-#define JSON_ELEMENT_AS_NULL()              \
-template<typename target_t>                 \
-typename enable_type_if<                    \
-    is_same<nullptr_t, target_t>::value,    \
-    nullptr_t>::type as() {                 \
-    return convert_to_null(); }               
-
-#define JSON_ELEMENT_AS_BOOL()              \
-template<typename target_t>                 \
-typename enable_type_if<                    \
-    is_same<bool, target_t>::value,         \
-    bool>::type as() {                      \
-    return convert_to_bool(); }         
-
-#define JSON_ELEMENT_AS_INT()               \
-template<typename target_t>                 \
-typename enable_type_if<                    \
-    is_integral<target_t>::value &&         \
-    !is_same<bool, target_t>::value,        \
-    target_t>::type as() {                  \
-    return convert_to_int<target_t>(); }    
-
-#define JSON_ELEMENT_AS_FLOAT()             \
-template<typename target_t>                 \
-typename enable_type_if<                    \
-    is_floating_point<target_t>::value,     \
-    target_t>::type as() {                  \
-    return convert_to_float<target_t>(); }
-
-#define JSON_ELEMENT_AS_C_STR(c_str_t)      \
-template<typename target_t>                 \
-typename enable_type_if<                    \
-    is_same<c_str_t, target_t>::value,      \
-    c_str_t>::type as() {                   \
-    return convert_to_c_str<c_str_t>(); }   
-    
-#define JSON_ELEMENT_AS_DYNAMIC_STRING()        \
-template<typename target_t>                     \
-typename enable_type_if<                        \
-    is_same<dynamic_string, target_t>::value,   \
-    dynamic_string>::type as() {                \
-    return convert_to_dynamic_string(); }
-
-#define JSON_ELEMENT_CONVERT_TO_INT(int_t)  \
-template<typename target_t>                 \
-typename enable_type_if<                    \
-    is_same<int_t, target_t>::value,        \
-    int_t>::type convert_to_int() {         \
-    return *reinterpret_cast<int_t *>(      \
-        m_data); }
-
 #define JSON_ELEMENT_CONVERT_TO_FLOAT(float_t)  \
 template<typename target_t>                     \
 typename enable_type_if<                        \
@@ -123,31 +28,16 @@ namespace wlp {
 
         // null
         explicit json_element(nullptr_t);
-        
-        // true, false
-        explicit json_element(bool b);
 
-        // number types
-        explicit json_element(char i);
-
-        // signed integer types
-        explicit json_element(signed char i);
-        explicit json_element(signed short i);
-        explicit json_element(signed int i);
-        explicit json_element(signed long i);
-        explicit json_element(signed long long i);
-
-        // unsigned integer types
-        explicit json_element(unsigned char i);
-        explicit json_element(unsigned short i);
-        explicit json_element(unsigned int i);
-        explicit json_element(unsigned long i);
-        explicit json_element(unsigned long long i);
-
-        // float types
-        explicit json_element(float r);
-        explicit json_element(double r);
-        explicit json_element(long double r);
+        // number types and bool
+        template<typename number_t, typename =
+            typename enable_if<is_integral<number_t>::value ||
+            is_floating_point<number_t>::value>::type>
+        json_element(number_t i) :
+            m_data(malloc<number_t>()),
+            m_type(type_info<number_t>::value),
+            m_size(sizeof(number_t)) {
+            data_assign(number_t, m_data) = i; }
 
         // string types
         explicit json_element(char *str);
@@ -172,38 +62,83 @@ namespace wlp {
         bool is_object();
 
         bool convertible_to(json_type type);
-        JSON_ELEMENT_CONVERTIBLE_TO_NULL()
-        JSON_ELEMENT_CONVERTIBLE_TO_BOOL()
-        JSON_ELEMENT_CONVERTIBLE_TO_INT()
-        JSON_ELEMENT_CONVERTIBLE_TO_FLOAT()
-        JSON_ELEMENT_CONVERTIBLE_TO_STRING()
+        template<typename target_t>
+        typename enable_type_if<
+            is_same<nullptr_t, target_t>::value,
+            bool>::type convertible_to() {
+            return is_null() || (is_string() &&
+            is_string_null()); }
+        template<typename target_t>
+        typename enable_type_if<
+            is_same<bool, target_t>::value,
+            bool>::type convertible_to() {
+            return is_null() || is_bool() ||
+                is_number() || (is_string() &&
+                (!m_size || is_string_bool())); }
+        template<typename target_t>
+        typename enable_type_if<
+            is_integral<target_t>::value &&
+            !is_same<bool, target_t>::value,
+            bool>::type convertible_to() {
+            return is_null() || is_bool() ||
+                is_int() || (is_string() &&
+                is_string_int()); }
+        template<typename target_t>
+        typename enable_type_if<
+            is_floating_point<target_t>::value,
+            bool>::type convertible_to() {
+            return is_null() || is_bool() ||
+                is_number() || (is_string() && (
+                is_string_int() ||
+                is_string_float())); }
+        template<typename target_t>
+        typename enable_type_if<
+            is_string_type<target_t>(),
+            bool>::type convertible_to() {
+            return true; }
 
-        JSON_ELEMENT_AS_NULL()
-        JSON_ELEMENT_AS_BOOL()
-        JSON_ELEMENT_AS_INT()
-        JSON_ELEMENT_AS_FLOAT()
-
-        JSON_ELEMENT_AS_C_STR(char *)
-        JSON_ELEMENT_AS_C_STR(const char *)
-        JSON_ELEMENT_AS_DYNAMIC_STRING()
-
-        JSON_ELEMENT_CONVERT_TO_INT(char)
-        JSON_ELEMENT_CONVERT_TO_INT(signed char)
-        JSON_ELEMENT_CONVERT_TO_INT(signed short)
-        JSON_ELEMENT_CONVERT_TO_INT(signed int)
-        JSON_ELEMENT_CONVERT_TO_INT(signed long)
-        JSON_ELEMENT_CONVERT_TO_INT(signed long long)
-        JSON_ELEMENT_CONVERT_TO_INT(unsigned char)
-        JSON_ELEMENT_CONVERT_TO_INT(unsigned short)
-        JSON_ELEMENT_CONVERT_TO_INT(unsigned int)
-        JSON_ELEMENT_CONVERT_TO_INT(unsigned long)
-        JSON_ELEMENT_CONVERT_TO_INT(unsigned long long)
-        JSON_ELEMENT_CONVERT_TO_FLOAT(float)
-        JSON_ELEMENT_CONVERT_TO_FLOAT(double)
-        JSON_ELEMENT_CONVERT_TO_FLOAT(long double)
+        template<typename target_t>
+        typename enable_type_if<
+            is_same<nullptr_t, target_t>::value,
+            nullptr_t>::type as() {
+            return convert_to_null(); }
+        template<typename target_t>
+        typename enable_type_if<
+            is_same<bool, target_t>::value,
+            bool>::type as() {
+            return convert_to_bool(); }
+        template<typename target_t>
+        typename enable_type_if<
+            is_integral<target_t>::value &&
+            !is_same<bool, target_t>::value,
+            target_t>::type as() {
+            return convert_to_number<target_t>(); }
+        template<typename target_t>
+        typename enable_type_if<
+            is_floating_point<target_t>::value,
+            target_t>::type as() {
+            return convert_to_number<target_t>(); }
+        template<typename target_t>
+        typename enable_type_if<
+            is_same<const char *, target_t>::value ||
+            is_same<char *, target_t>::value,
+            target_t>::type as() {
+                return convert_to_c_str<target_t>(); }
+        template<typename target_t>
+        typename enable_type_if<
+            is_same<dynamic_string, target_t>::value,
+            dynamic_string>::type as() {
+            return convert_to_dynamic_string(); }
+            
 
         nullptr_t convert_to_null();
         bool convert_to_bool();
+        template<typename target_t>
+        typename enable_type_if<
+            (is_integral<target_t>::value &&
+            !is_same<bool, target_t>::value) ||
+            is_floating_point<target_t>::value,
+            target_t>::type convert_to_number();
         template<typename c_str_t>
         c_str_t convert_to_c_str();
         dynamic_string convert_to_dynamic_string();
@@ -231,18 +166,18 @@ namespace wlp {
     };
 
     template<typename c_str_t>
-    c_str_t json_element::convert_to_c_str() {       
-        if (is_null()) { return s_str_null; } 
-        else if (is_bool()) { 
+    c_str_t json_element::convert_to_c_str() {
+        if (is_null()) { return s_str_null; }
+        else if (is_bool()) {
             return static_cast<c_str_t>(
                 data_assign(bool, m_data)
-                ? STR_TRUE : STR_FALSE);
+                ? s_str_true : s_str_false);
         } else if (is_signed_int()) {
-            static char strbuf[(8 * sizeof(long long) / 3) + 3]; 
+            static char strbuf[(8 * sizeof(long long) / 3) + 3];
             int len = 0;
             fprintf_t printer = s_type_printer[m_type];
             switch (m_type) {
-            case TYPE_CHAR: 
+            case TYPE_CHAR:
                 len = printer(strbuf, data_assign(char, m_data));
                 break;
             case TYPE_SIGNED_CHAR:
@@ -263,11 +198,10 @@ namespace wlp {
             default:
                 break;
             }
-            m_str.clear();
-            m_str.append(strbuf, len);
-            return static_cast<c_str_t>(m_str.c_str());
+            m_str = dynamic_string(strbuf, len);
+            return const_cast<c_str_t>(m_str.c_str());
         } else if (is_unsigned_int()) {
-            static char strbuf[(8 * sizeof(long long) / 3) + 3]; 
+            static char strbuf[(8 * sizeof(long long) / 3) + 3];
             int len = 0;
             fprintf_t printer = s_type_printer[m_type];
             switch (m_type) {
@@ -289,9 +223,8 @@ namespace wlp {
             default:
                 break;
             }
-            m_str.clear();
-            m_str.append(strbuf, len);
-            return static_cast<c_str_t>(m_str.c_str());
+            m_str = dynamic_string(strbuf, len);
+            return const_cast<c_str_t>(m_str.c_str());
         } else if (is_float()) {
             static char strbuf[10 + DBL_MAX_10_EXP];
             int len = 0;
@@ -309,13 +242,67 @@ namespace wlp {
             default:
                 break;
             }
-            m_str.clear();
-            m_str.append(strbuf, len);
-            return static_cast<c_str_t>(m_str.c_str());
+            m_str = dynamic_string(strbuf, len);
+            return const_cast<c_str_t>(m_str.c_str());
         } else if (is_string()) {
             return reinterpret_cast<c_str_t>(m_data);
         } else {
             return nullptr;
+        }
+    }
+
+    template<typename target_t>
+    typename enable_type_if<
+        (is_integral<target_t>::value &&
+        !is_same<bool, target_t>::value) ||
+        is_floating_point<target_t>::value,
+        target_t>::type json_element::convert_to_number() {
+        if (is_bool()) {
+            return static_cast<target_t>(
+                data_assign(bool, m_data));
+        } else if (is_int()) {
+            switch (m_size) {
+            case sizeof(char):
+                return static_cast<target_t>(
+                    data_assign(char, m_data));
+            case sizeof(short):
+                return static_cast<target_t>(
+                    data_assign(short, m_data));
+            case sizeof(int):
+                return static_cast<target_t>(
+                    data_assign(int, m_data));
+            case sizeof(long):
+                return static_cast<target_t>(
+                    data_assign(long, m_data));
+#if __WLIB_LONG_LONG__
+            case sizeof(long long):
+                return static_cast<target_t>(
+                    data_assign(long long, m_data));
+#endif
+            default:
+                return static_cast<target_t>(0);
+            }
+        } else if (is_float()) {
+            switch (m_size) {
+            case sizeof(float):
+                return static_cast<target_t>(
+                    data_assign(float, m_data));
+            case sizeof(double):
+                return static_cast<target_t>(
+                    data_assign(double, m_data));
+#if __WLIB_LONG_DOUBLE__
+            case sizeof(long double):
+                return static_cast<target_t>(
+                    data_assign(long double, m_data));
+#endif
+            default:
+                return static_cast<target_t>(0);
+            }
+        } else if (is_string()) {
+            return parser<target_t>()(
+                static_cast<const char *>(m_data));
+        } else {
+            return static_cast<target_t>(0);
         }
     }
 

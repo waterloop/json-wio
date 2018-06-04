@@ -1,6 +1,8 @@
 #ifndef __WLIB_JSON_JSONTYPE_H__
 #define __WLIB_JSON_JSONTYPE_H__
 
+#include <stdlib.h>
+
 #include <wlib/string>
 #include <wlib/utility>
 
@@ -13,6 +15,18 @@ template<>                                      \
 struct type_info<type_t> {                      \
     static constexpr json_type value = type_v;  \
 };
+
+#define PARSER_DECL(type, conv_func)    \
+template<>                              \
+struct parser<type> {                   \
+    type operator()(const char *str) {  \
+        return static_cast<type>(       \
+            conv_func(str)); }};        
+
+#define atoui(str) strtoul(str, nullptr, 10)
+#define atoul(str) strtoul(str, nullptr, 10)
+#define atoull(str) strtoull(str, nullptr, 10)
+#define atold(str) strtold(str, nullptr)
 
 namespace wlp {
 
@@ -82,8 +96,25 @@ namespace wlp {
     }
 
     typedef int (*fprintf_t) (char *, ...);
-
     extern fprintf_t s_type_printer[json_type::NUM_TYPES];
+
+    template<typename>
+    struct parser;
+
+    PARSER_DECL(char, atoi)
+    PARSER_DECL(signed char, atoi)
+    PARSER_DECL(signed short, atoi)
+    PARSER_DECL(signed int, atoi)
+    PARSER_DECL(signed long, atol)
+    PARSER_DECL(signed long long, atoll)
+    PARSER_DECL(unsigned char, atoui)
+    PARSER_DECL(unsigned short, atoui)
+    PARSER_DECL(unsigned int, atoui)
+    PARSER_DECL(unsigned long, atoul)
+    PARSER_DECL(unsigned long long, atoull)
+    PARSER_DECL(float, atof)
+    PARSER_DECL(double, atof)
+    PARSER_DECL(long double, atold)
 
 }
 
