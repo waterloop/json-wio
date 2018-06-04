@@ -45,12 +45,18 @@ assert_je_typecheck(strvar, false, false, false,    \
 ASSERT_EQ(var.convertible_to<nullptr_t>(), tonull);     \
 ASSERT_EQ(var.convertible_to<bool>(), tobool);          \
 ASSERT_EQ(var.convertible_to<int>(), toint);            \
-ASSERT_EQ(var.convertible_to<unsigned lont>(), toint);  \
+ASSERT_EQ(var.convertible_to<unsigned long>(), toint);  \
 ASSERT_EQ(var.convertible_to<float>(), tofloat);        \
 ASSERT_EQ(var.convertible_to<double>(), tofloat);       \
 ASSERT_EQ(var.convertible_to<const char *>(), tostr);   \
 ASSERT_EQ(var.convertible_to<char *>(), tostr);         \
 ASSERT_EQ(var.convertible_to<dynamic_string>(), tostr); 
+#define assert_je_ct_int(nvar) \
+assert_je_ct(nvar, false, true, true, true, true)
+#define assert_je_ct_float(nvar) \
+assert_je_ct(nvar, false, true, false, true, true)
+#define assert_je_ct_str(strvar) \
+assert_je_ct(strvar, false, false, false, false, true)                   
 
 using namespace wlp;
 
@@ -60,6 +66,9 @@ using namespace wlp;
 #define TEST_STR4   "null"
 #define TEST_STR5   "true"
 #define TEST_STR6   "false"
+#define TEST_STR7   "6634"
+#define TEST_STR8   "-503"
+#define TEST_STR9   "-4023.8"
 
 decl_je(null_e, nullptr_t, nullptr);
 decl_je(bool_e, bool, true);
@@ -82,6 +91,12 @@ static_string<128> s_str(TEST_STR3);
 json_element c_str_e(TEST_STR1);
 json_element d_str_e(d_str);
 json_element s_str_e(s_str);
+json_element str_null_e(TEST_STR4);
+json_element str_true_e(TEST_STR5);
+json_element str_false_e(TEST_STR6);
+json_element str_uint_e(TEST_STR7);
+json_element str_sint_e(TEST_STR8);
+json_element str_float_e(TEST_STR9);
 
 /*
 null_e
@@ -196,5 +211,30 @@ TEST(json_element, json_type_checks) {
 }
 
 TEST(json_element, convertible_to) {
+    assert_je_ct(null_e, true, true, true, true, true);
+    assert_je_ct(bool_e, false, true, true, true, true);
 
+    assert_je_ct_int(char_e);
+    assert_je_ct_int(s_char_e);
+    assert_je_ct_int(s_short_e);
+    assert_je_ct_int(s_int_e);
+    assert_je_ct_int(s_long_e);
+    assert_je_ct_int(s_lli_e);
+    assert_je_ct_int(u_char_e);
+    assert_je_ct_int(u_short_e);
+    assert_je_ct_int(u_int_e);
+    assert_je_ct_int(u_long_e);
+    assert_je_ct_int(u_lli_e);
+    assert_je_ct_float(float_e);
+    assert_je_ct_float(double_e);
+    assert_je_ct_float(longdbl_e);
+    assert_je_ct_str(c_str_e);
+    assert_je_ct_str(d_str_e);
+    assert_je_ct_str(s_str_e);
+    assert_je_ct(str_null_e, true, false, false, false, true);
+    assert_je_ct(str_true_e, false, true, false, false, true);
+    assert_je_ct(str_false_e, false, true, false, false, true);
+    assert_je_ct(str_uint_e, false, false, true, true, true);
+    assert_je_ct(str_sint_e, false, false, true, true, true);
+    assert_je_ct(str_float_e, false, false, false, true, true);
 }
