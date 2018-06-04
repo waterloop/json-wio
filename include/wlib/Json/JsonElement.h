@@ -11,15 +11,6 @@
 
 #define data_assign(type, dat) (*reinterpret_cast<type *>((dat)))
 
-#define JSON_ELEMENT_CONVERT_TO_FLOAT(float_t)  \
-template<typename target_t>                     \
-typename enable_type_if<                        \
-    is_same<float_t, target_t>::value,          \
-    float_t>::type convert_to_float() {         \
-    return *reinterpret_cast<float_t *>(        \
-        m_data); }
-
-
 namespace wlp {
 
     class json_element {
