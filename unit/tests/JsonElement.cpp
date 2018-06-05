@@ -296,3 +296,58 @@ TEST(json_element, as) {
     assert_je_as_u(str_sint_e, nullptr, false, -503, -503.0f, "-503");
     assert_je_as_u(str_float_e, nullptr, false, -4023, -4023.8, "-4023.8");
 }
+
+TEST(json_element, copy_constructor) {
+    json_element null_source(nullptr);
+    json_element null_copy(null_source);
+
+    ASSERT_EQ(TYPE_NULL, null_copy.type());
+    ASSERT_STREQ("null", null_copy.as<const char *>());
+    ASSERT_EQ(TYPE_NULL, null_source.type());
+    ASSERT_STREQ("null", null_source.as<const char *>());
+
+    json_element bool_source(true);
+    json_element bool_copy(bool_source);
+
+    ASSERT_EQ(TYPE_BOOL, bool_copy.type());
+    ASSERT_EQ(true, bool_copy.as<bool>());
+    ASSERT_EQ(TYPE_BOOL, bool_source.type());
+    ASSERT_EQ(true, bool_source.as<bool>());
+
+    constexpr int ival = -673427572;
+    json_element int_source(ival);
+    json_element int_copy(int_source);
+
+    ASSERT_EQ(TYPE_SIGNED_INT, int_copy.type());
+    ASSERT_EQ(ival, int_copy.as<int>());
+    ASSERT_EQ(TYPE_SIGNED_INT, int_source.type());
+    ASSERT_EQ(ival, int_source.as<int>());
+
+    constexpr uint uval = 25727344;
+    json_element uint_source(uval);
+    json_element uint_copy(uint_source);
+
+    ASSERT_EQ(TYPE_UNSIGNED_INT, uint_copy.type());
+    ASSERT_EQ(uval, uint_copy.as<uint>());
+    ASSERT_EQ(TYPE_UNSIGNED_INT, uint_source.type());
+    ASSERT_EQ(uval, uint_source.as<uint>());
+
+    constexpr double fval = -78383.5867e-2;
+    json_element double_source(fval);
+    json_element double_copy(double_source);
+
+    ASSERT_EQ(TYPE_DOUBLE, double_copy.type());
+    ASSERT_DOUBLE_EQ(fval, double_copy.as<double>());
+    ASSERT_EQ(TYPE_DOUBLE, double_source.type());
+    ASSERT_DOUBLE_EQ(fval, double_source.as<double>());
+
+    static char strval[] = "hello world! I am Jayson";
+    json_element str_source(strval);
+    json_element str_copy(str_source);
+
+    ASSERT_EQ(TYPE_JSON_STRING, str_copy.type());
+    ASSERT_EQ(TYPE_JSON_STRING, str_source.type());
+    ASSERT_STREQ(strval, str_copy.as<const char *>());
+    ASSERT_STREQ(strval, str_source.as<const char *>());
+}
+

@@ -41,3 +41,6 @@ ehthumbs_vista.db
 # Unit Tests
 cmake-build-debug/
 .idea/
+
+# vim
+*.swp

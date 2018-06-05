@@ -32,6 +32,13 @@ namespace wlp {
             m_floating(floating),
             m_type(type_info<number_t>::value) {}
 
+        // copy and move constructors
+        json_element(const json_element &je);
+        json_element(json_element &&je);
+        // copy and move operators
+        json_element &operator=(const json_element &je);
+        json_element &operator=(json_element &&je);
+
         // string types
         explicit json_element(char *str);
         explicit json_element(char *str, size_type size);

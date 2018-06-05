@@ -30,6 +30,12 @@ json_element::json_element(const dynamic_string &str) :
     m_str(str),
     m_type(TYPE_JSON_STRING) {}
 
+// copy and move constructors and operators
+json_element::json_element(const json_element &) = default;
+json_element::json_element(json_element &&) = default;
+json_element &json_element::operator=(const json_element &) = default;
+json_element &json_element::operator=(json_element &&) = default;
+
 // json_type checks
 bool json_element::is_primitive() { return m_type < TYPE_JSON_STRING; }
 bool json_element::is_null() { return m_type == TYPE_NULL; }
