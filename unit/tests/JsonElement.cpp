@@ -57,6 +57,26 @@ assert_je_ct(nvar, false, true, true, true, true)
 assert_je_ct(nvar, false, true, false, true, true)
 #define assert_je_ct_str(strvar) \
 assert_je_ct(strvar, false, false, false, false, true)                   
+#define assert_je_as(var, asnull, asbool, asint,    \
+    asuint, asfloat, asstr)                         \
+ASSERT_EQ(var.as<nullptr_t>(), asnull);             \
+ASSERT_EQ(var.as<bool>(), asbool);                  \
+ASSERT_EQ(var.as<char>(), asint);                   \
+ASSERT_EQ(var.as<short>(), asint);                  \
+ASSERT_EQ(var.as<int>(), asint);                    \
+ASSERT_EQ(var.as<long>(), asint);                   \
+ASSERT_EQ(var.as<long long>(), asint);              \
+ASSERT_EQ(var.as<unsigned char>(), asuint);         \
+ASSERT_EQ(var.as<unsigned short>(), asuint);        \
+ASSERT_EQ(var.as<unsigned int>(), asuint);          \
+ASSERT_EQ(var.as<unsigned long>(), asuint);         \
+ASSERT_EQ(var.as<unsigned long long>(), asuint);    \
+ASSERT_FLOAT_EQ(var.as<float>(), asfloat);          \
+ASSERT_DOUBLE_EQ(var.as<double>(), asfloat);        \
+ASSERT_DOUBLE_EQ(var.as<long double>(), asfloat);   \
+ASSERT_STREQ(var.as<char *>(), asstr);              \
+ASSERT_STREQ(var.as<const char *>(), asstr);        \
+ASSERT_EQ(var.as<dynamic_string>(), dynamic_string(asstr));
 
 using namespace wlp;
 
@@ -213,7 +233,6 @@ TEST(json_element, json_type_checks) {
 TEST(json_element, convertible_to) {
     assert_je_ct(null_e, true, true, true, true, true);
     assert_je_ct(bool_e, false, true, true, true, true);
-
     assert_je_ct_int(char_e);
     assert_je_ct_int(s_char_e);
     assert_je_ct_int(s_short_e);
@@ -237,4 +256,8 @@ TEST(json_element, convertible_to) {
     assert_je_ct(str_uint_e, false, false, true, true, true);
     assert_je_ct(str_sint_e, false, false, true, true, true);
     assert_je_ct(str_float_e, false, false, false, true, true);
+}
+
+TEST(json_element, as) {
+    assert_je_as(null_e, nullptr, false, 0, 0, 0, "null");
 }

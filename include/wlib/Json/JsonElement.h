@@ -120,7 +120,7 @@ namespace wlp {
             is_same<dynamic_string, target_t>::value,
             dynamic_string>::type as() {
             return convert_to_dynamic_string(); }
-            
+
 
         nullptr_t convert_to_null();
         bool convert_to_bool();
@@ -146,10 +146,6 @@ namespace wlp {
         bool is_string_array();
         bool is_string_object();
 
-        static char s_str_null[STR_SIZE_NULL + 1];
-        static char s_str_true[STR_SIZE_TRUE + 1];
-        static char s_str_false[STR_SIZE_FALSE + 1];
-
         void *m_data;
         dynamic_string m_str;
         json_type m_type;
@@ -158,11 +154,16 @@ namespace wlp {
 
     template<typename c_str_t>
     c_str_t json_element::convert_to_c_str() {
-        if (is_null()) { return s_str_null; }
+        if (is_null()) {
+            m_str = dynamic_string(STR_NULL, STR_SIZE_NULL);
+            return const_cast<c_str_t>(m_str.c_str());
+        }
         else if (is_bool()) {
-            return static_cast<c_str_t>(
-                data_assign(bool, m_data)
-                ? s_str_true : s_str_false);
+            bool b = data_assign(bool, m_data);
+            m_str = dynamic_string(
+                b ? STR_TRUE : STR_FALSE,
+                b ? STR_SIZE_TRUE : STR_SIZE_FALSE);
+            return const_cast<c_str_t>(m_str.c_str());
         } else if (is_signed_int()) {
             static char strbuf[(8 * sizeof(long long) / 3) + 3];
             int len = 0;

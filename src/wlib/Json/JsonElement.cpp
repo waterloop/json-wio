@@ -11,10 +11,6 @@ case sizeof(fill_t):                                \
 
 using namespace wlp;
 
-char json_element::s_str_null[STR_SIZE_NULL + 1] = STR_NULL;
-char json_element::s_str_true[STR_SIZE_TRUE + 1] = STR_TRUE;
-char json_element::s_str_false[STR_SIZE_FALSE + 1] = STR_FALSE;
-
 json_element::~json_element() {
     if (m_type == TYPE_JSON_STRING) {
         free<char>(static_cast<char *>(m_data));
@@ -183,7 +179,7 @@ bool json_element::convert_to_bool() {
 }
 
 dynamic_string json_element::convert_to_dynamic_string() {
-    convert_to_c_str<char *>();
+    convert_to_c_str<const char *>();
     return m_str;
 }
 
