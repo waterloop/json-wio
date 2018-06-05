@@ -3,6 +3,7 @@
 
 #include <float.h>
 
+#include <stdio.h>
 #include <wlib/string>
 #include <wlib/utility>
 
@@ -10,15 +11,6 @@
 #include <wlib/Json/JsonType.h>
 
 #define data_assign(type, dat) (*reinterpret_cast<type *>((dat)))
-
-#define JSON_ELEMENT_CONVERT_TO_FLOAT(float_t)  \
-template<typename target_t>                     \
-typename enable_type_if<                        \
-    is_same<float_t, target_t>::value,          \
-    float_t>::type convert_to_float() {         \
-    return *reinterpret_cast<float_t *>(        \
-        m_data); }
-
 
 namespace wlp {
 
@@ -129,7 +121,7 @@ namespace wlp {
             is_same<dynamic_string, target_t>::value,
             dynamic_string>::type as() {
             return convert_to_dynamic_string(); }
-            
+
 
         nullptr_t convert_to_null();
         bool convert_to_bool();
@@ -155,10 +147,6 @@ namespace wlp {
         bool is_string_array();
         bool is_string_object();
 
-        static char s_str_null[STR_SIZE_NULL + 1];
-        static char s_str_true[STR_SIZE_TRUE + 1];
-        static char s_str_false[STR_SIZE_FALSE + 1];
-
         void *m_data;
         dynamic_string m_str;
         json_type m_type;
@@ -167,12 +155,18 @@ namespace wlp {
 
     template<typename c_str_t>
     c_str_t json_element::convert_to_c_str() {
-        if (is_null()) { return s_str_null; }
+        if (is_null()) {
+            m_str = dynamic_string(STR_NULL, STR_SIZE_NULL);
+            return const_cast<c_str_t>(m_str.c_str());
+        }
         else if (is_bool()) {
-            return static_cast<c_str_t>(
-                data_assign(bool, m_data)
-                ? s_str_true : s_str_false);
+            bool b = data_assign(bool, m_data);
+            m_str = dynamic_string(
+                b ? STR_TRUE : STR_FALSE,
+                b ? STR_SIZE_TRUE : STR_SIZE_FALSE);
+            return const_cast<c_str_t>(m_str.c_str());
         } else if (is_signed_int()) {
+            short s = 0;
             static char strbuf[(8 * sizeof(long long) / 3) + 3];
             int len = 0;
             fprintf_t printer = s_type_printer[m_type];
@@ -245,7 +239,8 @@ namespace wlp {
             m_str = dynamic_string(strbuf, len);
             return const_cast<c_str_t>(m_str.c_str());
         } else if (is_string()) {
-            return reinterpret_cast<c_str_t>(m_data);
+            m_str = dynamic_string(reinterpret_cast<const char *>(m_data), m_size);
+            return const_cast<c_str_t>(m_str.c_str());
         } else {
             return nullptr;
         }
@@ -274,7 +269,7 @@ namespace wlp {
             case sizeof(long):
                 return static_cast<target_t>(
                     data_assign(long, m_data));
-#if __WLIB_LONG_LONG__
+#ifdef WLIB_USE_LONG_LONG
             case sizeof(long long):
                 return static_cast<target_t>(
                     data_assign(long long, m_data));
@@ -290,7 +285,7 @@ namespace wlp {
             case sizeof(double):
                 return static_cast<target_t>(
                     data_assign(double, m_data));
-#if __WLIB_LONG_DOUBLE__
+#ifdef WLIB_USE_LONG_DOUBLE
             case sizeof(long double):
                 return static_cast<target_t>(
                     data_assign(long double, m_data));

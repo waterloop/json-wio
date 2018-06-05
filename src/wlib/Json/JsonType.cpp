@@ -43,6 +43,8 @@ DEFN_PRINTER(long_double_printer, "%Lf")
 DEFN_PRINTER(string_printer, "%s")
 
 wlp::fprintf_t wlp::s_type_printer[wlp::json_type::NUM_TYPES] = {
+    null_printer,
+    bool_printer,
     char_printer,
     signed_char_printer,
     signed_short_printer,

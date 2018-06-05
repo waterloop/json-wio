@@ -11,10 +11,6 @@ case sizeof(fill_t):                                \
 
 using namespace wlp;
 
-char json_element::s_str_null[STR_SIZE_NULL + 1] = STR_NULL;
-char json_element::s_str_true[STR_SIZE_TRUE + 1] = STR_TRUE;
-char json_element::s_str_false[STR_SIZE_FALSE + 1] = STR_FALSE;
-
 json_element::~json_element() {
     if (m_type == TYPE_JSON_STRING) {
         free<char>(static_cast<char *>(m_data));
@@ -147,7 +143,7 @@ bool json_element::convert_to_bool() {
             switch_size_cast(bool, short, m_data)
             switch_size_cast(bool, int, m_data)
             switch_size_cast(bool, long, m_data)
-#if __WLIB_LONG_LONG__
+#ifdef WLIB_USE_LONG_LONG
             switch_size_cast(bool, long long, m_data)
 #endif
         default:
@@ -159,7 +155,7 @@ bool json_element::convert_to_bool() {
             switch_size_cast(bool, unsigned short, m_data)
             switch_size_cast(bool, unsigned int, m_data)
             switch_size_cast(bool, unsigned long, m_data)
-#if __WLIB_LONG_LONG__
+#ifdef WLIB_USE_LONG_LONG
             switch_size_cast(bool, unsigned long long, m_data)
 #endif
         default:
@@ -169,7 +165,7 @@ bool json_element::convert_to_bool() {
         switch (m_size) {
             switch_size_cast(bool, float, m_data)
             switch_size_cast(bool, double, m_data)
-#if __WLIB_LONG_DOUBLE__
+#ifdef WLIB_USE_LONG_DOUBLE
             switch_size_cast(bool, long double, m_data)
 #endif
         default:
@@ -183,7 +179,7 @@ bool json_element::convert_to_bool() {
 }
 
 dynamic_string json_element::convert_to_dynamic_string() {
-    convert_to_c_str<char *>();
+    convert_to_c_str<const char *>();
     return m_str;
 }
 

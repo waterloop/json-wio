@@ -23,6 +23,7 @@ file(GLOB_RECURSE JSON_FILES
 
 add_library(json ${JSON_FILES})
 target_link_libraries(json wlib)
+target_compile_definitions(json PUBLIC WLIB_USE_LONG_DOUBLE)
 target_include_directories(json PUBLIC 
     ${JSON_DIR}/include
     ${WLIB_DIR}/include
