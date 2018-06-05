@@ -143,7 +143,7 @@ bool json_element::convert_to_bool() {
             switch_size_cast(bool, short, m_data)
             switch_size_cast(bool, int, m_data)
             switch_size_cast(bool, long, m_data)
-#if __WLIB_LONG_LONG__
+#ifdef WLIB_USE_LONG_LONG
             switch_size_cast(bool, long long, m_data)
 #endif
         default:
@@ -155,7 +155,7 @@ bool json_element::convert_to_bool() {
             switch_size_cast(bool, unsigned short, m_data)
             switch_size_cast(bool, unsigned int, m_data)
             switch_size_cast(bool, unsigned long, m_data)
-#if __WLIB_LONG_LONG__
+#ifdef WLIB_USE_LONG_LONG
             switch_size_cast(bool, unsigned long long, m_data)
 #endif
         default:
@@ -165,7 +165,7 @@ bool json_element::convert_to_bool() {
         switch (m_size) {
             switch_size_cast(bool, float, m_data)
             switch_size_cast(bool, double, m_data)
-#if __WLIB_LONG_DOUBLE__
+#ifdef WLIB_USE_LONG_DOUBLE
             switch_size_cast(bool, long double, m_data)
 #endif
         default:

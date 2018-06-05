@@ -2,6 +2,16 @@
 #include <wlib/Json/JsonType.h>
 #include <wlib/Json/JsonElement.h>
 
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+typedef unsigned long long ull;
+
+typedef long long lli;
+typedef long double ld;
+
+#define cast(type, v) static_cast<type>(v)
 #define decl_je(name, type, val) \
 static json_element name(static_cast<type>(val))
 #define assert_je_type(var, type_v) \
@@ -30,7 +40,7 @@ ASSERT_EQ(var.is_float(), isfloat);             \
 ASSERT_EQ(var.is_number(), isnumber);           \
 ASSERT_EQ(var.is_string(), isstring);           \
 ASSERT_EQ(var.is_array(), isarray);             \
-ASSERT_EQ(var.is_object(), isobject);       
+ASSERT_EQ(var.is_object(), isobject);
 #define assert_je_typecheck_int(ivar)           \
 assert_je_typecheck(ivar, false, false, true,   \
     false, true, false, false, false)
@@ -50,33 +60,42 @@ ASSERT_EQ(var.convertible_to<float>(), tofloat);        \
 ASSERT_EQ(var.convertible_to<double>(), tofloat);       \
 ASSERT_EQ(var.convertible_to<const char *>(), tostr);   \
 ASSERT_EQ(var.convertible_to<char *>(), tostr);         \
-ASSERT_EQ(var.convertible_to<dynamic_string>(), tostr); 
+ASSERT_EQ(var.convertible_to<dynamic_string>(), tostr);
 #define assert_je_ct_int(nvar) \
 assert_je_ct(nvar, false, true, true, true, true)
 #define assert_je_ct_float(nvar) \
 assert_je_ct(nvar, false, true, false, true, true)
 #define assert_je_ct_str(strvar) \
-assert_je_ct(strvar, false, false, false, false, true)                   
+assert_je_ct(strvar, false, false, false, false, true)
 #define assert_je_as(var, asnull, asbool, asint,    \
     asuint, asfloat, asstr)                         \
 ASSERT_EQ(var.as<nullptr_t>(), asnull);             \
 ASSERT_EQ(var.as<bool>(), asbool);                  \
-ASSERT_EQ(var.as<char>(), asint);                   \
-ASSERT_EQ(var.as<short>(), asint);                  \
-ASSERT_EQ(var.as<int>(), asint);                    \
-ASSERT_EQ(var.as<long>(), asint);                   \
-ASSERT_EQ(var.as<long long>(), asint);              \
-ASSERT_EQ(var.as<unsigned char>(), asuint);         \
-ASSERT_EQ(var.as<unsigned short>(), asuint);        \
-ASSERT_EQ(var.as<unsigned int>(), asuint);          \
-ASSERT_EQ(var.as<unsigned long>(), asuint);         \
-ASSERT_EQ(var.as<unsigned long long>(), asuint);    \
+ASSERT_EQ(var.as<char>(), cast(char, asint));       \
+ASSERT_EQ(var.as<short>(), cast(short, asint));     \
+ASSERT_EQ(var.as<int>(), cast(int, asint));         \
+ASSERT_EQ(var.as<long>(), cast(long, asint));       \
+ASSERT_EQ(var.as<long long>(), cast(lli, asint));   \
+ASSERT_EQ(var.as<unsigned char>(), cast(uchar, asuint));    \
+ASSERT_EQ(var.as<unsigned short>(), cast(ushort, asuint));  \
+ASSERT_EQ(var.as<unsigned int>(), cast(uint, asuint));      \
+ASSERT_EQ(var.as<unsigned long>(), cast(ulong, asuint));    \
+ASSERT_EQ(var.as<unsigned long long>(), cast(ull, asuint)); \
 ASSERT_FLOAT_EQ(var.as<float>(), asfloat);          \
 ASSERT_DOUBLE_EQ(var.as<double>(), asfloat);        \
 ASSERT_DOUBLE_EQ(var.as<long double>(), asfloat);   \
 ASSERT_STREQ(var.as<char *>(), asstr);              \
 ASSERT_STREQ(var.as<const char *>(), asstr);        \
 ASSERT_EQ(var.as<dynamic_string>(), dynamic_string(asstr));
+#define assert_je_as_u(var, asnull, asbool, asint,  \
+    asfloat, asstr)                                 \
+assert_je_as(var, asnull, asbool, asint, asint, asfloat, asstr)
+#define assert_je_as_str(strvar, asstr)         \
+ASSERT_EQ(strvar.as<nullptr_t>(), nullptr);     \
+ASSERT_STREQ(strvar.as<char *>(), asstr);       \
+ASSERT_STREQ(strvar.as<const char *>(), asstr); \
+ASSERT_EQ(strvar.as<dynamic_string>(), dynamic_string(asstr))
+
 
 using namespace wlp;
 
@@ -91,6 +110,7 @@ using namespace wlp;
 #define TEST_STR9   "-4023.8"
 
 decl_je(null_e, nullptr_t, nullptr);
+decl_je(false_e, bool, false);
 decl_je(bool_e, bool, true);
 decl_je(char_e, char, 'g');
 decl_je(s_char_e, signed char, -10);
@@ -207,7 +227,7 @@ TEST(json_element, constructor_data) {
 }
 
 TEST(json_element, json_type_checks) {
-    assert_je_typecheck(null_e, true, false, false, 
+    assert_je_typecheck(null_e, true, false, false,
         false, false, false, false, false);
     assert_je_typecheck(bool_e, false, true, false,
         false, false, false, false, false);
@@ -259,5 +279,31 @@ TEST(json_element, convertible_to) {
 }
 
 TEST(json_element, as) {
+    constexpr int g_ord = cast(int, 'g');
     assert_je_as(null_e, nullptr, false, 0, 0, 0, "null");
+    assert_je_as(false_e, nullptr, false, 0, 0, 0, "false");
+    assert_je_as(bool_e, nullptr, true, 1, 1, 1.0, "true");
+    assert_je_as_u(char_e, nullptr, true, g_ord, g_ord, "103");
+    assert_je_as_u(s_char_e, nullptr, true, -10, -10.0f, "-10");
+    assert_je_as_u(s_short_e, nullptr, true, -11, -11.0f, "-11");
+    assert_je_as_u(s_int_e, nullptr, true, -12, -12.0f, "-12");
+    assert_je_as_u(s_long_e, nullptr, true, -13, -13.0f, "-13");
+    assert_je_as_u(s_lli_e, nullptr, true, -14, -14.0f, "-14");
+    assert_je_as_u(u_char_e, nullptr, true, 10, 10.0f, "10");
+    assert_je_as_u(u_short_e, nullptr, true, 11, 11.0f, "11");
+    assert_je_as_u(u_int_e, nullptr, true, 12, 12.0f, "12");
+    assert_je_as_u(u_long_e, nullptr, true, 13, 13.0f, "13");
+    assert_je_as_u(u_lli_e, nullptr, true, 14, 14.0f, "14");
+    assert_je_as_u(float_e, nullptr, true, 12, 12.12f, "12.120000");
+    assert_je_as_u(double_e, nullptr, true, 13, 13.13, "13.130000");
+    assert_je_as_u(longdbl_e, nullptr, true, 14, 14.14, "14.140000");
+    assert_je_as_str(c_str_e, TEST_STR1);
+    assert_je_as_str(d_str_e, TEST_STR2);
+    assert_je_as_str(s_str_e, TEST_STR3);
+    assert_je_as_str(str_null_e, TEST_STR4);
+    assert_je_as_str(str_true_e, TEST_STR5);
+    assert_je_as_str(str_false_e, TEST_STR6);
+    assert_je_as_u(str_uint_e, nullptr, false, 6634, 6634.0f, "6634");
+    assert_je_as_u(str_sint_e, nullptr, false, -503, -503.0f, "-503");
+    assert_je_as_u(str_float_e, nullptr, false, -4023, -4023.8, "-4023.8");
 }

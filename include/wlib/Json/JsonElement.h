@@ -3,6 +3,7 @@
 
 #include <float.h>
 
+#include <stdio.h>
 #include <wlib/string>
 #include <wlib/utility>
 
@@ -165,6 +166,7 @@ namespace wlp {
                 b ? STR_SIZE_TRUE : STR_SIZE_FALSE);
             return const_cast<c_str_t>(m_str.c_str());
         } else if (is_signed_int()) {
+            short s = 0;
             static char strbuf[(8 * sizeof(long long) / 3) + 3];
             int len = 0;
             fprintf_t printer = s_type_printer[m_type];
@@ -237,7 +239,8 @@ namespace wlp {
             m_str = dynamic_string(strbuf, len);
             return const_cast<c_str_t>(m_str.c_str());
         } else if (is_string()) {
-            return reinterpret_cast<c_str_t>(m_data);
+            m_str = dynamic_string(reinterpret_cast<const char *>(m_data), m_size);
+            return const_cast<c_str_t>(m_str.c_str());
         } else {
             return nullptr;
         }
@@ -266,7 +269,7 @@ namespace wlp {
             case sizeof(long):
                 return static_cast<target_t>(
                     data_assign(long, m_data));
-#if __WLIB_LONG_LONG__
+#ifdef WLIB_USE_LONG_LONG
             case sizeof(long long):
                 return static_cast<target_t>(
                     data_assign(long long, m_data));
@@ -282,7 +285,7 @@ namespace wlp {
             case sizeof(double):
                 return static_cast<target_t>(
                     data_assign(double, m_data));
-#if __WLIB_LONG_DOUBLE__
+#ifdef WLIB_USE_LONG_DOUBLE
             case sizeof(long double):
                 return static_cast<target_t>(
                     data_assign(long double, m_data));
