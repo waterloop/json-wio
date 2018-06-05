@@ -9,27 +9,26 @@
 #include <wlib/Json/JsonUtil.h>
 #include <wlib/Json/JsonType.h>
 
-#define data_assign(type, dat) (*reinterpret_cast<type *>((dat)))
-
 namespace wlp {
 
     class json_element {
     public:
         // null
+        json_element();
         explicit json_element(nullptr_t);
 
         // bool and integer types
         template<typename number_t, typename =
-            typename enable_if<is_integral<number_t>::value
+        typename enable_if<is_integral<number_t>::value
         >::type>
-        json_element(number_t integer, char = 0) :
+        explicit json_element(number_t integer, char = 0) :
             m_integer(integer),
             m_type(type_info<number_t>::value) {}
         // floating point types
         template<typename number_t, typename =
-            typename enable_if<is_floating_point<number_t>::value
+        typename enable_if<is_floating_point<number_t>::value
         >::type>
-        json_element(number_t floating, float = 0) :
+        explicit json_element(number_t floating, float = 0) :
             m_floating(floating),
             m_type(type_info<number_t>::value) {}
 
@@ -95,39 +94,45 @@ namespace wlp {
         typename enable_type_if<
             is_same<nullptr_t, target_t>::value,
             nullptr_t>::type as() {
-            return convert_to_null(); }
+            return convert_to_null();
+        }
         template<typename target_t>
         // convert to bool
         typename enable_type_if<
             is_same<bool, target_t>::value,
             bool>::type as() {
-            return convert_to_bool(); }
+            return convert_to_bool();
+        }
         // convert to int
         template<typename target_t>
         typename enable_type_if<
             is_integral<target_t>::value &&
             !is_same<bool, target_t>::value,
             target_t>::type as() {
-            return static_cast<target_t>(convert_to_int()); }
+            return static_cast<target_t>(convert_to_int());
+        }
         // convert to float
         template<typename target_t>
         typename enable_type_if<
             is_floating_point<target_t>::value,
             target_t>::type as() {
-            return static_cast<target_t>(convert_to_float()); }
+            return static_cast<target_t>(convert_to_float());
+        }
         // convert to C string
         template<typename target_t>
         typename enable_type_if<
             is_same<const char *, target_t>::value ||
             is_same<char *, target_t>::value,
             target_t>::type as() {
-            return const_cast<target_t>(convert_to_string()); }
+            return const_cast<target_t>(convert_to_string());
+        }
         // convert to dynamic string
         template<typename target_t>
         typename enable_type_if<
             is_same<dynamic_string, target_t>::value,
             dynamic_string>::type as() {
-            return convert_to_dynamic_string(); }
+            return convert_to_dynamic_string();
+        }
 
         nullptr_t convert_to_null();
         bool convert_to_bool();

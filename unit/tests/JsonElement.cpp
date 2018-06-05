@@ -9,7 +9,6 @@ typedef unsigned long ulong;
 typedef unsigned long long ull;
 
 typedef long long lli;
-typedef long double ld;
 
 #define cast(type, v) static_cast<type>(v)
 
@@ -18,9 +17,6 @@ static json_element name(static_cast<type>(val))
 
 #define assert_je_type(var, type_v) \
 ASSERT_EQ(var.type(), type_v)
-
-#define assert_je_size(var, type_v) \
-ASSERT_EQ(var.size(), sizeof(type_of<type_v>::type))
 
 #define assert_je_datai(var, type_v, val)                       \
 { auto a = static_cast<type_of<type_v>::type>(var.integer());   \
