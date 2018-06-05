@@ -16,41 +16,39 @@ struct type_info<type_t> {                      \
     static constexpr json_type value = type_v;  \
 };
 
-#define PARSER_DECL(type, conv_func)    \
-template<>                              \
-struct parser<type> {                   \
-    type operator()(const char *str) {  \
-        return static_cast<type>(       \
-            conv_func(str)); }};        
-
-#define atoui(str) strtoul(str, nullptr, 10)
-#define atoul(str) strtoul(str, nullptr, 10)
-#define atoull(str) strtoull(str, nullptr, 10)
-#define atold(str) strtold(str, nullptr)
-
 namespace wlp {
 
-    enum json_type {
-        TYPE_NULL,
-        TYPE_BOOL,
-        TYPE_CHAR,
-        TYPE_SIGNED_CHAR,
-        TYPE_SIGNED_SHORT,
-        TYPE_SIGNED_INT,
-        TYPE_SIGNED_LONG,
-        TYPE_SIGNED_LONG_LONG,
-        TYPE_UNSIGNED_CHAR,
-        TYPE_UNSIGNED_SHORT,
-        TYPE_UNSIGNED_INT,
-        TYPE_UNSIGNED_LONG,
-        TYPE_UNSIGNED_LONG_LONG,
-        TYPE_FLOAT,
-        TYPE_DOUBLE,
-        TYPE_LONG_DOUBLE,
-        TYPE_JSON_STRING,
-        TYPE_JSON_ARRAY,
-        TYPE_JSON_OBJECT,
-        NUM_TYPES
+    enum json_type : unsigned char {
+        TYPE_NULL = 0x00,
+
+        TYPE_BOOL = 0x11,
+
+        TYPE_CHAR = 0x22,
+        TYPE_SIGNED_CHAR = 0x23,
+        TYPE_SIGNED_SHORT = 0x24,
+        TYPE_SIGNED_INT = 0x25,
+        TYPE_SIGNED_LONG = 0x26,
+        TYPE_SIGNED_LONG_LONG = 0x27,
+        TYPE_UNSIGNED_CHAR = 0x28,
+        TYPE_UNSIGNED_SHORT = 0x29,
+        TYPE_UNSIGNED_INT = 0x2a,
+        TYPE_UNSIGNED_LONG = 0x2b,
+        TYPE_UNSIGNED_LONG_LONG = 0x2c,
+
+        TYPE_FLOAT = 0x3d,
+        TYPE_DOUBLE = 0x3e,
+        TYPE_LONG_DOUBLE = 0x3f,
+        
+        TYPE_JSON_STRING = 0x40,
+
+        TYPE_JSON_ARRAY = 0x50,
+
+        TYPE_JSON_OBJECT = 0x60,
+
+        NUM_TYPES = 19,
+        NUM_CLASS = 7,
+        NUM_NUMERICAL = 14,
+        NUM_PRIMITIVE = 16
     };
 
     template<json_type type>
@@ -81,7 +79,6 @@ namespace wlp {
 
     template<bool cond, typename target_t = void>
     struct enable_type_if {};
-
     template<typename target_t>
     struct enable_type_if<true, target_t> {
         typedef target_t type;
@@ -94,27 +91,6 @@ namespace wlp {
             is_same<const char *, target_t>::value ||
             is_same<dynamic_string, target_t>::value;
     }
-
-    typedef int (*fprintf_t) (char *, ...);
-    extern fprintf_t s_type_printer[json_type::NUM_TYPES];
-
-    template<typename>
-    struct parser;
-
-    PARSER_DECL(char, atoi)
-    PARSER_DECL(signed char, atoi)
-    PARSER_DECL(signed short, atoi)
-    PARSER_DECL(signed int, atoi)
-    PARSER_DECL(signed long, atol)
-    PARSER_DECL(signed long long, atoll)
-    PARSER_DECL(unsigned char, atoui)
-    PARSER_DECL(unsigned short, atoui)
-    PARSER_DECL(unsigned int, atoui)
-    PARSER_DECL(unsigned long, atoul)
-    PARSER_DECL(unsigned long long, atoull)
-    PARSER_DECL(float, atof)
-    PARSER_DECL(double, atof)
-    PARSER_DECL(long double, atold)
 
 }
 

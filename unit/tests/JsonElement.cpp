@@ -12,24 +12,30 @@ typedef long long lli;
 typedef long double ld;
 
 #define cast(type, v) static_cast<type>(v)
+
 #define decl_je(name, type, val) \
 static json_element name(static_cast<type>(val))
+
 #define assert_je_type(var, type_v) \
 ASSERT_EQ(var.type(), type_v)
+
 #define assert_je_size(var, type_v) \
 ASSERT_EQ(var.size(), sizeof(type_of<type_v>::type))
-#define assert_je_data(var, type_v, val)                    \
-{ type_of<type_v>::type *ptr =                              \
-  reinterpret_cast<type_of<type_v>::type *>(var.data());    \
-  ASSERT_EQ(*ptr, val); }
-#define assert_je_dataf(var, type_v, asserter, fval)        \
-{ type_of<type_v>::type *ptr =                              \
-  reinterpret_cast<type_of<type_v>::type *>(var.data());    \
-  asserter(*ptr, fval); }
-#define assert_je_datastr(var, strval)          \
-{ const char *str =                             \
-  reinterpret_cast<const char *>(var.data());   \
-  ASSERT_STREQ(str, strval); }
+
+#define assert_je_datai(var, type_v, val)                       \
+{ auto a = static_cast<type_of<type_v>::type>(var.integer());   \
+  auto b = static_cast<type_of<type_v>::type>(val);             \
+  ASSERT_EQ(a, b); }
+
+#define assert_je_dataf(var, type_v, asfunc, val)               \
+{ auto a = static_cast<type_of<type_v>::type>(var.floating());  \
+  auto b = static_cast<type_of<type_v>::type>(val);             \
+  asfunc(a, b); }
+
+#define assert_je_datastr(var, val) \
+{ auto a = var.str().c_str();       \
+  ASSERT_STREQ(a, val); }
+
 #define assert_je_typecheck(var,                \
     isnull, isbool, isint, isfloat,             \
     isnumber, isstring, isarray, isobject)      \
@@ -41,15 +47,19 @@ ASSERT_EQ(var.is_number(), isnumber);           \
 ASSERT_EQ(var.is_string(), isstring);           \
 ASSERT_EQ(var.is_array(), isarray);             \
 ASSERT_EQ(var.is_object(), isobject);
+
 #define assert_je_typecheck_int(ivar)           \
 assert_je_typecheck(ivar, false, false, true,   \
     false, true, false, false, false)
+
 #define assert_je_typecheck_float(fvar)         \
 assert_je_typecheck(fvar, false, false, false,  \
     true, true, false, false, false)
+
 #define assert_je_typecheck_str(strvar)             \
 assert_je_typecheck(strvar, false, false, false,    \
     false, false, true, false, false)
+
 #define assert_je_ct(var, tonull, tobool,               \
     toint, tofloat, tostr)                              \
 ASSERT_EQ(var.convertible_to<nullptr_t>(), tonull);     \
@@ -61,12 +71,16 @@ ASSERT_EQ(var.convertible_to<double>(), tofloat);       \
 ASSERT_EQ(var.convertible_to<const char *>(), tostr);   \
 ASSERT_EQ(var.convertible_to<char *>(), tostr);         \
 ASSERT_EQ(var.convertible_to<dynamic_string>(), tostr);
+
 #define assert_je_ct_int(nvar) \
 assert_je_ct(nvar, false, true, true, true, true)
+
 #define assert_je_ct_float(nvar) \
 assert_je_ct(nvar, false, true, false, true, true)
+
 #define assert_je_ct_str(strvar) \
 assert_je_ct(strvar, false, false, false, false, true)
+
 #define assert_je_as(var, asnull, asbool, asint,    \
     asuint, asfloat, asstr)                         \
 ASSERT_EQ(var.as<nullptr_t>(), asnull);             \
@@ -87,9 +101,11 @@ ASSERT_DOUBLE_EQ(var.as<long double>(), asfloat);   \
 ASSERT_STREQ(var.as<char *>(), asstr);              \
 ASSERT_STREQ(var.as<const char *>(), asstr);        \
 ASSERT_EQ(var.as<dynamic_string>(), dynamic_string(asstr));
+
 #define assert_je_as_u(var, asnull, asbool, asint,  \
     asfloat, asstr)                                 \
 assert_je_as(var, asnull, asbool, asint, asint, asfloat, asstr)
+
 #define assert_je_as_str(strvar, asstr)         \
 ASSERT_EQ(strvar.as<nullptr_t>(), nullptr);     \
 ASSERT_STREQ(strvar.as<char *>(), asstr);       \
@@ -182,42 +198,19 @@ TEST(json_element, constructor_json_type) {
     assert_je_type(s_str_e, TYPE_JSON_STRING);
 }
 
-TEST(json_element, constructor_size) {
-    assert_je_size(null_e, TYPE_NULL);
-    assert_je_size(bool_e, TYPE_BOOL);
-    assert_je_size(char_e, TYPE_CHAR);
-    assert_je_size(s_char_e, TYPE_SIGNED_CHAR);
-    assert_je_size(s_short_e, TYPE_SIGNED_SHORT);
-    assert_je_size(s_int_e, TYPE_SIGNED_INT);
-    assert_je_size(s_long_e, TYPE_SIGNED_LONG);
-    assert_je_size(s_lli_e, TYPE_SIGNED_LONG_LONG);
-    assert_je_size(u_char_e, TYPE_UNSIGNED_CHAR);
-    assert_je_size(u_short_e, TYPE_UNSIGNED_SHORT);
-    assert_je_size(u_int_e, TYPE_UNSIGNED_INT);
-    assert_je_size(u_long_e, TYPE_UNSIGNED_LONG);
-    assert_je_size(u_lli_e, TYPE_UNSIGNED_LONG_LONG);
-    assert_je_size(float_e, TYPE_FLOAT);
-    assert_je_size(double_e, TYPE_DOUBLE);
-    assert_je_size(longdbl_e, TYPE_LONG_DOUBLE);
-    ASSERT_EQ(c_str_e.size(), strlen(TEST_STR1));
-    ASSERT_EQ(d_str_e.size(), strlen(TEST_STR2));
-    ASSERT_EQ(s_str_e.size(), strlen(TEST_STR3));
-}
-
 TEST(json_element, constructor_data) {
-    assert_je_data(null_e, TYPE_NULL, nullptr);
-    assert_je_data(bool_e, TYPE_BOOL, true);
-    assert_je_data(char_e, TYPE_CHAR, 'g');
-    assert_je_data(s_char_e, TYPE_SIGNED_CHAR, -10);
-    assert_je_data(s_short_e, TYPE_SIGNED_SHORT, -11);
-    assert_je_data(s_int_e, TYPE_SIGNED_INT, -12);
-    assert_je_data(s_long_e, TYPE_SIGNED_LONG, -13);
-    assert_je_data(s_lli_e, TYPE_SIGNED_LONG_LONG, -14);
-    assert_je_data(u_char_e, TYPE_UNSIGNED_CHAR, 10);
-    assert_je_data(u_short_e, TYPE_UNSIGNED_SHORT, 11);
-    assert_je_data(u_int_e, TYPE_UNSIGNED_INT, 12);
-    assert_je_data(u_long_e, TYPE_UNSIGNED_LONG, 13);
-    assert_je_data(u_lli_e, TYPE_UNSIGNED_LONG_LONG, 14);
+    assert_je_datai(bool_e, TYPE_BOOL, true);
+    assert_je_datai(char_e, TYPE_CHAR, 'g');
+    assert_je_datai(s_char_e, TYPE_SIGNED_CHAR, -10);
+    assert_je_datai(s_short_e, TYPE_SIGNED_SHORT, -11);
+    assert_je_datai(s_int_e, TYPE_SIGNED_INT, -12);
+    assert_je_datai(s_long_e, TYPE_SIGNED_LONG, -13);
+    assert_je_datai(s_lli_e, TYPE_SIGNED_LONG_LONG, -14);
+    assert_je_datai(u_char_e, TYPE_UNSIGNED_CHAR, 10);
+    assert_je_datai(u_short_e, TYPE_UNSIGNED_SHORT, 11);
+    assert_je_datai(u_int_e, TYPE_UNSIGNED_INT, 12);
+    assert_je_datai(u_long_e, TYPE_UNSIGNED_LONG, 13);
+    assert_je_datai(u_lli_e, TYPE_UNSIGNED_LONG_LONG, 14);
     assert_je_dataf(float_e, TYPE_FLOAT, ASSERT_FLOAT_EQ, 12.12f);
     assert_je_dataf(double_e, TYPE_DOUBLE, ASSERT_DOUBLE_EQ, 13.13);
     assert_je_dataf(longdbl_e, TYPE_LONG_DOUBLE, ASSERT_DOUBLE_EQ, 14.14);
