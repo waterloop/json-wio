@@ -5,7 +5,7 @@ language: cpp
 compiler: g++
 
 install:
-  - sudo apt install g++ cmake
+  - sudo apt install cmake
 
 script:
   - gcc -v
