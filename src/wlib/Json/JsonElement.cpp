@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 
 #include <wlib/memory>
@@ -30,19 +31,19 @@ bool json_element::is_primitive() { return m_type < TYPE_JSON_STRING; }
 bool json_element::is_null() { return m_type == TYPE_NULL; }
 bool json_element::is_bool() { return m_type == TYPE_BOOL; }
 bool json_element::is_int() {
-    return TYPE_CHAR <= m_type && 
+    return TYPE_CHAR <= m_type &&
     m_type <= TYPE_UNSIGNED_LONG_LONG; }
-bool json_element::is_signed_int() { 
-    return TYPE_CHAR <= m_type && 
+bool json_element::is_signed_int() {
+    return TYPE_CHAR <= m_type &&
     m_type <= TYPE_SIGNED_LONG_LONG; }
-bool json_element::is_unsigned_int() { 
-    return TYPE_UNSIGNED_CHAR <= m_type && 
+bool json_element::is_unsigned_int() {
+    return TYPE_UNSIGNED_CHAR <= m_type &&
     m_type <= TYPE_UNSIGNED_LONG_LONG; }
-bool json_element::is_float() { 
-    return TYPE_FLOAT <= m_type && 
+bool json_element::is_float() {
+    return TYPE_FLOAT <= m_type &&
     m_type <= TYPE_LONG_DOUBLE; }
-bool json_element::is_number() { 
-    return TYPE_CHAR <= m_type && 
+bool json_element::is_number() {
+    return TYPE_CHAR <= m_type &&
     m_type <= TYPE_LONG_DOUBLE; }
 bool json_element::is_string() { return m_type == TYPE_JSON_STRING; }
 bool json_element::is_array() { return m_type == TYPE_JSON_ARRAY; }
@@ -56,7 +57,7 @@ bool json_element::is_string_true() {
     return m_str.length() == STR_SIZE_TRUE &&
         m_str == STR_TRUE; }
 bool json_element::is_string_false() {
-    return m_str.length() == STR_SIZE_FALSE && 
+    return m_str.length() == STR_SIZE_FALSE &&
         m_str == STR_FALSE; }
 bool json_element::is_string_bool() {
     return is_string_true() || is_string_false(); }
@@ -78,7 +79,7 @@ bool json_element::convertible_to_int() {
     return m_type <= TYPE_UNSIGNED_LONG_LONG || (is_string() && is_string_int()); }
 bool json_element::convertible_to_float() {
     return m_type <= TYPE_LONG_DOUBLE || (is_string() && is_string_float()); }
-bool json_element::convertible_to_string() { 
+bool json_element::convertible_to_string() {
     return true; }
 
 // type conversions
@@ -92,7 +93,7 @@ namespace bool_convert {
     static bool from_obj(json_element *) { return false; }
     static type converter[json_type::NUM_CLASS] = {
         from_null, from_int, from_int,
-        from_float, from_str, 
+        from_float, from_str,
         from_arr, from_obj
     };
 }
@@ -126,10 +127,10 @@ namespace double_convert {
 }
 namespace string_convert {
     typedef void (*type)(json_element *je);
-    static void from_null(json_element *je) { 
+    static void from_null(json_element *je) {
         je->str().set_value(STR_NULL, STR_SIZE_NULL); }
     static void from_bool(json_element *je) {
-        if (static_cast<bool>(je->integer())) { 
+        if (static_cast<bool>(je->integer())) {
             je->str().set_value(STR_TRUE, STR_SIZE_TRUE); }
         else { je->str().set_value(STR_FALSE, STR_SIZE_FALSE); }}
     static void from_int(json_element *je) {
@@ -157,7 +158,7 @@ long long json_element::convert_to_int() {
     return long_convert::converter[m_type >> 4](this); }
 long double json_element::convert_to_float() {
     return double_convert::converter[m_type >> 4](this); }
-const char *convert_to_string() {
+const char *json_element::convert_to_string() {
     string_convert::converter[m_type >> 4](this);
     return m_str.c_str(); }
 

@@ -1,7 +1,7 @@
 pkg:
   name: wlib-json
   description: JSON library for wio
-  url: https://github.com/waterloop/json-wio.git
+  repository: ""
   version: 1.0.0
   author: Jeff Niu
   contributors: []
@@ -13,11 +13,13 @@ pkg:
   - json
   - waterloop
   license: MIT
+  header_only: false
   platform: ALL
   framework:
   - ALL
   board:
   - ALL
+  - uno
   compile_flags: []
   ide: none
 
@@ -26,7 +28,8 @@ targets:
   create:
     tests:
       board: uno
-      compile_flags: []
+      target_compile_flags: []
+      pkg_compile_flags: []
 
 dependencies:
   wlib-wio:

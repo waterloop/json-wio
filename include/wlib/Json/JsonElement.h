@@ -19,17 +19,17 @@ namespace wlp {
         explicit json_element(nullptr_t);
 
         // bool and integer types
-        template<typename number_t, typename = 
+        template<typename number_t, typename =
             typename enable_if<is_integral<number_t>::value
         >::type>
-        json_element(number_t integer) :
+        json_element(number_t integer, char = 0) :
             m_integer(integer),
             m_type(type_info<number_t>::value) {}
         // floating point types
-        template<typename number_t, typename = 
+        template<typename number_t, typename =
             typename enable_if<is_floating_point<number_t>::value
         >::type>
-        json_element(number_t floating) :
+        json_element(number_t floating, float = 0) :
             m_floating(floating),
             m_type(type_info<number_t>::value) {}
 
@@ -121,7 +121,7 @@ namespace wlp {
             is_same<const char *, target_t>::value ||
             is_same<char *, target_t>::value,
             target_t>::type as() {
-            return convert_to_string(); }
+            return const_cast<target_t>(convert_to_string()); }
         // convert to dynamic string
         template<typename target_t>
         typename enable_type_if<
@@ -152,7 +152,6 @@ namespace wlp {
         dynamic_string &str();
         const dynamic_string &str() const;
         json_type type() const;
-        int size() const;
 
     private:
         union {
