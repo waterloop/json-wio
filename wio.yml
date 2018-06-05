@@ -1,5 +1,5 @@
 pkg:
-  name: json-wio
+  name: wlib-json
   description: JSON library for wio
   url: https://github.com/waterloop/json-wio.git
   version: 1.0.0
@@ -18,7 +18,6 @@ pkg:
   - ALL
   board:
   - ALL
-  - uno
   compile_flags: []
   ide: none
 
