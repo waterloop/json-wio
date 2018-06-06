@@ -12,7 +12,7 @@ using namespace wlp;
 { json_type jt = type_info<type_t>::value;  \
   ASSERT_EQ(jt, je1.type()); }
 
-TEST(json_compare, json_element_equality_null) {
+TEST(json_compare, equality_null) {
     json_element a;
     json_element b;
 
@@ -30,7 +30,7 @@ TEST(json_compare, json_element_equality_null) {
 
 #include <stdio.h>
 
-TEST(json_compare, json_element_equality_bool) {
+TEST(json_compare, equality_bool) {
     json_element a(true);
     json_element b(false);
 
@@ -54,7 +54,7 @@ TEST(json_compare, json_element_equality_bool) {
     ASSERT_NE(y, a);
 }
 
-TEST(json_compare, json_element_equality_int) {
+TEST(json_compare, equality_int) {
     constexpr short val1 = -523;
     constexpr int val2 = -523;
     constexpr int val3 = 6642;
@@ -93,7 +93,7 @@ TEST(json_compare, json_element_equality_int) {
     ASSERT_NE(e, a);
 }
 
-TEST(json_compare, test_element_equality_float) {
+TEST(json_compare, equality_float) {
     constexpr float f1 = -49293.424f;
     constexpr float f2 = f1;
     constexpr float f3 = 234.12f;
@@ -135,7 +135,7 @@ TEST(json_compare, test_element_equality_float) {
     ASSERT_NE(ed2, ed3);
 }
 
-TEST(json_compare, json_element_equality_string) {
+TEST(json_compare, equality_string) {
     constexpr auto str1 = "Confederation forces continue to march south towards Mittenheid";
     constexpr auto str2 = "The unstoppable war machine annihilates our armies and destroys are resources";
     constexpr auto str3 = "Soon they will lay siege to our capital and threaten us with destruction";
@@ -165,7 +165,7 @@ TEST(json_compare, json_element_equality_string) {
     ASSERT_NE(es4, es6);
 }
 
-TEST(json_compare, json_element_different_types) {
+TEST(json_compare, different_types) {
     json_element null_e(nullptr);
     json_element bool_e(true);
     json_element int_e(1);
@@ -185,7 +185,7 @@ TEST(json_compare, json_element_different_types) {
     ASSERT_NE(str_e, null_e);
 }
 
-TEST(json_compare, json_element_less_null) {
+TEST(json_compare, less_null) {
     json_element null_a(nullptr);
     json_element null_b(nullptr);
 
@@ -200,7 +200,7 @@ TEST(json_compare, json_element_less_null) {
     ASSERT_LE(null_a, null_b);
 }
 
-TEST(json_compare, json_element_less_bool) {
+TEST(json_compare, less_bool) {
     json_element true_e(true);
     json_element false_e(false);
 
@@ -218,7 +218,7 @@ TEST(json_compare, json_element_less_bool) {
     ASSERT_LE(other_e, true_e);
 }
 
-TEST(json_compare, json_element_less_int) {
+TEST(json_compare, less_int) {
     json_element low(25);
     json_element mid1(static_cast<short>(50));
     json_element mid2(50);
@@ -239,7 +239,7 @@ TEST(json_compare, json_element_less_int) {
     ASSERT_GE(mid1, mid2);
 }
 
-TEST(json_compare, json_element_less_float) {
+TEST(json_compare, less_float) {
     json_element lower(-423.23f);
     json_element low(-423.23f);
     json_element mid(-10.0);
@@ -267,7 +267,7 @@ TEST(json_compare, json_element_less_float) {
     ASSERT_GE(higher, high);
 }
 
-TEST(json_compare, json_element_less_str) {
+TEST(json_compare, element_less_str) {
     constexpr auto low = "A brown fox jumped over the lazy dog";
     constexpr auto mid = "aaaaaaaaabbbbbbbbbbbbbbbbcccccccccc";
     constexpr auto high = "zebras are horses with white and black stripes";
