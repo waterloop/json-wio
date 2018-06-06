@@ -1,16 +1,20 @@
+/***************************************************
+ * Includes
+ **************************************************/
 #include <gtest/gtest.h>
+
+#include <wlib/utility>
+
 #include <wlib/Json/JsonType.h>
 #include <wlib/Json/JsonElement.h>
 
-typedef unsigned char uchar;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef unsigned long long ull;
-
-typedef long long lli;
-
+/***************************************************
+ * Macro definitions
+ **************************************************/
 #define cast(type, v) static_cast<type>(v)
+
+#define assert_type(var, type) \
+ASSERT_EQ(type_info<type>::value, var.type());
 
 #define decl_je(name, type, val) \
 static json_element name(static_cast<type>(val))
@@ -108,9 +112,22 @@ ASSERT_STREQ(strvar.as<char *>(), asstr);       \
 ASSERT_STREQ(strvar.as<const char *>(), asstr); \
 ASSERT_EQ(strvar.as<dynamic_string>(), dynamic_string(asstr))
 
+/***************************************************
+ * Data types
+ **************************************************/
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+typedef unsigned long long ull;
+
+typedef long long lli;
 
 using namespace wlp;
 
+/***************************************************
+ * Test strings
+ **************************************************/
 #define TEST_STR1   "hello my name is jeff"
 #define TEST_STR2   "war of the worlds"
 #define TEST_STR3   "your empire needs you"
@@ -121,6 +138,9 @@ using namespace wlp;
 #define TEST_STR8   "-503"
 #define TEST_STR9   "-4023.8"
 
+/***************************************************
+ * Static members
+ **************************************************/
 decl_je(null_e, nullptr_t, nullptr);
 decl_je(false_e, bool, false);
 decl_je(bool_e, bool, true);
@@ -172,6 +192,9 @@ d_str_e
 s_str_e
 */
 
+/***************************************************
+ * Unit tests
+ **************************************************/
 TEST(json_element, constructor_json_type) {
     assert_je_type(null_e, TYPE_NULL);
     assert_je_type(bool_e, TYPE_BOOL);
@@ -351,3 +374,38 @@ TEST(json_element, copy_constructor) {
     ASSERT_STREQ(strval, str_source.as<const char *>());
 }
 
+TEST(json_element, default_constructor) {
+    json_element element;
+    ASSERT_EQ(TYPE_NULL, element.type());
+    ASSERT_STREQ("null", element.as<const char *>());
+}
+
+TEST(json_element, move_constructor) {
+    constexpr int ival = -2747572;
+    constexpr uint uval = 57727273;
+    constexpr double fval = -48285.2e-2;
+    static char teststr[] = "the birth of sigmar";
+
+    json_element null_a(nullptr);
+    json_element bool_a(true);
+    json_element int_a(ival);
+    json_element uint_a(uval);
+    json_element double_a(fval);
+    json_element str_a(teststr);
+
+    assert_type(null_a, nullptr_t);
+    assert_type(bool_a, bool);
+    assert_type(int_a, int);
+    assert_type(uint_a, uint);
+    assert_type(double_a, double);
+    assert_type(str_a, const char *);
+
+    json_element null_b(move(null_a));
+    json_element bool_b(move(bool_a));
+    json_element int_b(move(int_a));
+    json_element uint_b(move(uint_a));
+    json_element double_b(move(double_a));
+
+
+
+}

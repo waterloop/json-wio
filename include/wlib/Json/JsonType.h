@@ -73,7 +73,11 @@ namespace wlp {
     TYPE_DECL(TYPE_FLOAT, float)
     TYPE_DECL(TYPE_DOUBLE, double)
     TYPE_DECL(TYPE_LONG_DOUBLE, long double)
+    
     TYPE_DECL(TYPE_JSON_STRING, char *)
+    TYPE_DECL(TYPE_JSON_STRING, const char *)
+    TYPE_DECL(TYPE_JSON_STRING, dynamic_string)
+
     TYPE_DECL(TYPE_JSON_ARRAY, short *)
     TYPE_DECL(TYPE_JSON_OBJECT, int *)
 
