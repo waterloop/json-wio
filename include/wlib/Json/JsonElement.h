@@ -3,6 +3,8 @@
 
 #include <float.h>
 
+#include <wlib/array_list>
+#include <wlib/hash_map>
 #include <wlib/string>
 #include <wlib/utility>
 
@@ -10,6 +12,18 @@
 #include <wlib/Json/JsonType.h>
 
 namespace wlp {
+
+    class json_element;
+    class json_element_hash;
+    class json_element_equals;
+
+    typedef array_list<json_element> json_array;
+    typedef hash_map<
+        json_element,
+        json_element,
+        json_element_hash,
+        json_element_equals
+    > json_object;
 
     class json_element {
     public:
@@ -207,6 +221,14 @@ namespace wlp {
         } m_data;
         dynamic_string m_str;
         json_type m_type;
+    };
+
+    class json_element_hash {
+        size_type operator()(const json_element &je) const;
+    };
+
+    class json_element_equals {
+        bool operator()(const json_element &je1, const json_element &je2) const;
     };
 
 }
