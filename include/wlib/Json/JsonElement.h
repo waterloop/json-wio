@@ -203,14 +203,17 @@ namespace wlp {
         bool operator<=(const json_element &o) const;
         bool operator>=(const json_element &o) const;
 
-    private:
+    public:
         union data {
             data();
             explicit data(long long i);
             explicit data(long double f);
             long long integer;
             long double floating;
-        } m_data;
+        };
+
+    private:
+        data m_data;
         dynamic_string m_str;
         json_type m_type;
     };
