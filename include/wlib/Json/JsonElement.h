@@ -195,6 +195,15 @@ namespace wlp {
         const dynamic_string &str() const;
         json_type type() const;
 
+    public:
+        bool operator==(const json_element &o);
+        bool operator< (const json_element &o);
+
+        inline bool operator!=(const json_element &o) { return *this != o; }
+        inline bool operator> (const json_element &o) { return *this >  o; }
+        inline bool operator<=(const json_element &o) { return *this <= o; }
+        inline bool operator>=(const json_element &o) { return *this >= o; }
+
     private:
         union data {
             data();
