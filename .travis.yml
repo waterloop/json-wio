@@ -1,0 +1,28 @@
+dist: trusty
+sudo: require
+
+language: cpp
+compiler: g++
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-5
+      - g++-5
+      - cmake
+
+install:
+  - curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+  - sudo apt-get install -y nodejs
+  - sudo npm install -g wio --unsafe-perm
+
+script:
+  - gcc -v
+  - g++ -v
+  - cmake --version
+  - wio update pkg .
+  - wio pac get
+  - ./wmake test
+
