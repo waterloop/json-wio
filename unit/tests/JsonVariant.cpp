@@ -6,7 +6,7 @@
 #include <wlib/utility>
 
 #include <wlib/Json/JsonType.h>
-#include <wlib/Json/JsonElement.h>
+#include <wlib/Json/JsonVariant.h>
 
 /***************************************************
  * Macro definitions
@@ -18,7 +18,7 @@
   ASSERT_EQ(_type_, var.type()); }
 
 #define decl_je(name, type, val) \
-static json_element name(static_cast<type>(val))
+static json_variant name(static_cast<type>(val))
 
 #define assert_je_type(var, type_v) \
 ASSERT_EQ(var.type(), type_v)
@@ -161,15 +161,15 @@ decl_je(double_e, double, 13.13);
 decl_je(longdbl_e, long double, 14.14);
 dynamic_string d_str(TEST_STR2);
 static_string<128> s_str(TEST_STR3);
-json_element c_str_e(TEST_STR1);
-json_element d_str_e(d_str);
-json_element s_str_e(s_str);
-json_element str_null_e(TEST_STR4);
-json_element str_true_e(TEST_STR5);
-json_element str_false_e(TEST_STR6);
-json_element str_uint_e(TEST_STR7);
-json_element str_sint_e(TEST_STR8);
-json_element str_float_e(TEST_STR9);
+json_variant c_str_e(TEST_STR1);
+json_variant d_str_e(d_str);
+json_variant s_str_e(s_str);
+json_variant str_null_e(TEST_STR4);
+json_variant str_true_e(TEST_STR5);
+json_variant str_false_e(TEST_STR6);
+json_variant str_uint_e(TEST_STR7);
+json_variant str_sint_e(TEST_STR8);
+json_variant str_float_e(TEST_STR9);
 
 /*
 null_e
@@ -196,7 +196,7 @@ s_str_e
 /***************************************************
  * Unit tests
  **************************************************/
-TEST(json_element, constructor_json_type) {
+TEST(json_variant, constructor_json_type) {
     assert_je_type(null_e, TYPE_NULL);
     assert_je_type(bool_e, TYPE_BOOL);
     assert_je_type(char_e, TYPE_CHAR);
@@ -218,7 +218,7 @@ TEST(json_element, constructor_json_type) {
     assert_je_type(s_str_e, TYPE_JSON_STRING);
 }
 
-TEST(json_element, constructor_data) {
+TEST(json_variant, constructor_data) {
     assert_je_datai(bool_e, TYPE_BOOL, true);
     assert_je_datai(char_e, TYPE_CHAR, 'g');
     assert_je_datai(s_char_e, TYPE_SIGNED_CHAR, -10);
@@ -239,7 +239,7 @@ TEST(json_element, constructor_data) {
     assert_je_datastr(s_str_e, TEST_STR3);
 }
 
-TEST(json_element, json_type_checks) {
+TEST(json_variant, json_type_checks) {
     assert_je_typecheck(null_e, true, false, false,
         false, false, false, false, false);
     assert_je_typecheck(bool_e, false, true, false,
@@ -263,7 +263,7 @@ TEST(json_element, json_type_checks) {
     assert_je_typecheck_str(s_str_e)
 }
 
-TEST(json_element, convertible_to) {
+TEST(json_variant, convertible_to) {
     assert_je_ct(null_e, true, true, true, true, true);
     assert_je_ct(bool_e, false, true, true, true, true);
     assert_je_ct_int(char_e);
@@ -291,7 +291,7 @@ TEST(json_element, convertible_to) {
     assert_je_ct(str_float_e, false, false, false, true, true);
 }
 
-TEST(json_element, as) {
+TEST(json_variant, as) {
     constexpr int g_ord = cast(int, 'g');
     assert_je_as(null_e, nullptr, false, 0, 0, 0, "null");
     assert_je_as(false_e, nullptr, false, 0, 0, 0, "false");
@@ -321,17 +321,17 @@ TEST(json_element, as) {
     assert_je_as_u(str_float_e, nullptr, false, -4023, -4023.8, "-4023.8");
 }
 
-TEST(json_element, copy_constructor) {
-    json_element null_source(nullptr);
-    json_element null_copy(null_source);
+TEST(json_variant, copy_constructor) {
+    json_variant null_source(nullptr);
+    json_variant null_copy(null_source);
 
     ASSERT_EQ(TYPE_NULL, null_copy.type());
     ASSERT_STREQ("null", null_copy.as<const char *>());
     ASSERT_EQ(TYPE_NULL, null_source.type());
     ASSERT_STREQ("null", null_source.as<const char *>());
 
-    json_element bool_source(true);
-    json_element bool_copy(bool_source);
+    json_variant bool_source(true);
+    json_variant bool_copy(bool_source);
 
     ASSERT_EQ(TYPE_BOOL, bool_copy.type());
     ASSERT_EQ(true, bool_copy.as<bool>());
@@ -339,8 +339,8 @@ TEST(json_element, copy_constructor) {
     ASSERT_EQ(true, bool_source.as<bool>());
 
     constexpr int ival = -673427572;
-    json_element int_source(ival);
-    json_element int_copy(int_source);
+    json_variant int_source(ival);
+    json_variant int_copy(int_source);
 
     ASSERT_EQ(TYPE_SIGNED_INT, int_copy.type());
     ASSERT_EQ(ival, int_copy.as<int>());
@@ -348,8 +348,8 @@ TEST(json_element, copy_constructor) {
     ASSERT_EQ(ival, int_source.as<int>());
 
     constexpr uint uval = 25727344;
-    json_element uint_source(uval);
-    json_element uint_copy(uint_source);
+    json_variant uint_source(uval);
+    json_variant uint_copy(uint_source);
 
     ASSERT_EQ(TYPE_UNSIGNED_INT, uint_copy.type());
     ASSERT_EQ(uval, uint_copy.as<uint>());
@@ -357,8 +357,8 @@ TEST(json_element, copy_constructor) {
     ASSERT_EQ(uval, uint_source.as<uint>());
 
     constexpr double fval = -78383.5867e-2;
-    json_element double_source(fval);
-    json_element double_copy(double_source);
+    json_variant double_source(fval);
+    json_variant double_copy(double_source);
 
     ASSERT_EQ(TYPE_DOUBLE, double_copy.type());
     ASSERT_DOUBLE_EQ(fval, double_copy.as<double>());
@@ -366,8 +366,8 @@ TEST(json_element, copy_constructor) {
     ASSERT_DOUBLE_EQ(fval, double_source.as<double>());
 
     static char strval[] = "hello world! I am Jayson";
-    json_element str_source(strval);
-    json_element str_copy(str_source);
+    json_variant str_source(strval);
+    json_variant str_copy(str_source);
 
     ASSERT_EQ(TYPE_JSON_STRING, str_copy.type());
     ASSERT_EQ(TYPE_JSON_STRING, str_source.type());
@@ -375,24 +375,24 @@ TEST(json_element, copy_constructor) {
     ASSERT_STREQ(strval, str_source.as<const char *>());
 }
 
-TEST(json_element, default_constructor) {
-    json_element element;
+TEST(json_variant, default_constructor) {
+    json_variant element;
     ASSERT_EQ(TYPE_NULL, element.type());
     ASSERT_STREQ("null", element.as<const char *>());
 }
 
-TEST(json_element, move_constructor) {
+TEST(json_variant, move_constructor) {
     constexpr int ival = -2747572;
     constexpr uint uval = 57727273;
     constexpr double fval = -48285.2e-2;
     static char teststr[] = "the birth of sigmar";
 
-    json_element null_a(nullptr);
-    json_element bool_a(true);
-    json_element int_a(ival);
-    json_element uint_a(uval);
-    json_element double_a(fval);
-    json_element str_a(teststr);
+    json_variant null_a(nullptr);
+    json_variant bool_a(true);
+    json_variant int_a(ival);
+    json_variant uint_a(uval);
+    json_variant double_a(fval);
+    json_variant str_a(teststr);
 
     assert_type(null_a, nullptr_t);
     assert_type(bool_a, bool);
@@ -401,12 +401,12 @@ TEST(json_element, move_constructor) {
     assert_type(double_a, double);
     assert_type(str_a, const char *);
 
-    json_element null_b(move(null_a));
-    json_element bool_b(move(bool_a));
-    json_element int_b(move(int_a));
-    json_element uint_b(move(uint_a));
-    json_element double_b(move(double_a));
-    json_element str_b(move(str_a));
+    json_variant null_b(move(null_a));
+    json_variant bool_b(move(bool_a));
+    json_variant int_b(move(int_a));
+    json_variant uint_b(move(uint_a));
+    json_variant double_b(move(double_a));
+    json_variant str_b(move(str_a));
 
     assert_type(null_a, nullptr_t);
     assert_type(bool_a, nullptr_t);
