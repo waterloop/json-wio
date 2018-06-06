@@ -1,26 +1,27 @@
+/***************************************************
+ * Includes
+ **************************************************/
 #include <gtest/gtest.h>
+
+#include <wlib/utility>
+
 #include <wlib/Json/JsonType.h>
 #include <wlib/Json/JsonElement.h>
 
-typedef unsigned char uchar;
-typedef unsigned short ushort;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef unsigned long long ull;
-
-typedef long long lli;
-typedef long double ld;
-
+/***************************************************
+ * Macro definitions
+ **************************************************/
 #define cast(type, v) static_cast<type>(v)
+
+#define assert_type(var, type_t)                \
+{ json_type _type_ = type_info<type_t>::value;  \
+  ASSERT_EQ(_type_, var.type()); }
 
 #define decl_je(name, type, val) \
 static json_element name(static_cast<type>(val))
 
 #define assert_je_type(var, type_v) \
 ASSERT_EQ(var.type(), type_v)
-
-#define assert_je_size(var, type_v) \
-ASSERT_EQ(var.size(), sizeof(type_of<type_v>::type))
 
 #define assert_je_datai(var, type_v, val)                       \
 { auto a = static_cast<type_of<type_v>::type>(var.integer());   \
@@ -112,9 +113,22 @@ ASSERT_STREQ(strvar.as<char *>(), asstr);       \
 ASSERT_STREQ(strvar.as<const char *>(), asstr); \
 ASSERT_EQ(strvar.as<dynamic_string>(), dynamic_string(asstr))
 
+/***************************************************
+ * Data types
+ **************************************************/
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+typedef unsigned long long ull;
+
+typedef long long lli;
 
 using namespace wlp;
 
+/***************************************************
+ * Test strings
+ **************************************************/
 #define TEST_STR1   "hello my name is jeff"
 #define TEST_STR2   "war of the worlds"
 #define TEST_STR3   "your empire needs you"
@@ -125,6 +139,9 @@ using namespace wlp;
 #define TEST_STR8   "-503"
 #define TEST_STR9   "-4023.8"
 
+/***************************************************
+ * Static members
+ **************************************************/
 decl_je(null_e, nullptr_t, nullptr);
 decl_je(false_e, bool, false);
 decl_je(bool_e, bool, true);
@@ -176,6 +193,9 @@ d_str_e
 s_str_e
 */
 
+/***************************************************
+ * Unit tests
+ **************************************************/
 TEST(json_element, constructor_json_type) {
     assert_je_type(null_e, TYPE_NULL);
     assert_je_type(bool_e, TYPE_BOOL);
@@ -299,4 +319,115 @@ TEST(json_element, as) {
     assert_je_as_u(str_uint_e, nullptr, false, 6634, 6634.0f, "6634");
     assert_je_as_u(str_sint_e, nullptr, false, -503, -503.0f, "-503");
     assert_je_as_u(str_float_e, nullptr, false, -4023, -4023.8, "-4023.8");
+}
+
+TEST(json_element, copy_constructor) {
+    json_element null_source(nullptr);
+    json_element null_copy(null_source);
+
+    ASSERT_EQ(TYPE_NULL, null_copy.type());
+    ASSERT_STREQ("null", null_copy.as<const char *>());
+    ASSERT_EQ(TYPE_NULL, null_source.type());
+    ASSERT_STREQ("null", null_source.as<const char *>());
+
+    json_element bool_source(true);
+    json_element bool_copy(bool_source);
+
+    ASSERT_EQ(TYPE_BOOL, bool_copy.type());
+    ASSERT_EQ(true, bool_copy.as<bool>());
+    ASSERT_EQ(TYPE_BOOL, bool_source.type());
+    ASSERT_EQ(true, bool_source.as<bool>());
+
+    constexpr int ival = -673427572;
+    json_element int_source(ival);
+    json_element int_copy(int_source);
+
+    ASSERT_EQ(TYPE_SIGNED_INT, int_copy.type());
+    ASSERT_EQ(ival, int_copy.as<int>());
+    ASSERT_EQ(TYPE_SIGNED_INT, int_source.type());
+    ASSERT_EQ(ival, int_source.as<int>());
+
+    constexpr uint uval = 25727344;
+    json_element uint_source(uval);
+    json_element uint_copy(uint_source);
+
+    ASSERT_EQ(TYPE_UNSIGNED_INT, uint_copy.type());
+    ASSERT_EQ(uval, uint_copy.as<uint>());
+    ASSERT_EQ(TYPE_UNSIGNED_INT, uint_source.type());
+    ASSERT_EQ(uval, uint_source.as<uint>());
+
+    constexpr double fval = -78383.5867e-2;
+    json_element double_source(fval);
+    json_element double_copy(double_source);
+
+    ASSERT_EQ(TYPE_DOUBLE, double_copy.type());
+    ASSERT_DOUBLE_EQ(fval, double_copy.as<double>());
+    ASSERT_EQ(TYPE_DOUBLE, double_source.type());
+    ASSERT_DOUBLE_EQ(fval, double_source.as<double>());
+
+    static char strval[] = "hello world! I am Jayson";
+    json_element str_source(strval);
+    json_element str_copy(str_source);
+
+    ASSERT_EQ(TYPE_JSON_STRING, str_copy.type());
+    ASSERT_EQ(TYPE_JSON_STRING, str_source.type());
+    ASSERT_STREQ(strval, str_copy.as<const char *>());
+    ASSERT_STREQ(strval, str_source.as<const char *>());
+}
+
+TEST(json_element, default_constructor) {
+    json_element element;
+    ASSERT_EQ(TYPE_NULL, element.type());
+    ASSERT_STREQ("null", element.as<const char *>());
+}
+
+TEST(json_element, move_constructor) {
+    constexpr int ival = -2747572;
+    constexpr uint uval = 57727273;
+    constexpr double fval = -48285.2e-2;
+    static char teststr[] = "the birth of sigmar";
+
+    json_element null_a(nullptr);
+    json_element bool_a(true);
+    json_element int_a(ival);
+    json_element uint_a(uval);
+    json_element double_a(fval);
+    json_element str_a(teststr);
+
+    assert_type(null_a, nullptr_t);
+    assert_type(bool_a, bool);
+    assert_type(int_a, int);
+    assert_type(uint_a, uint);
+    assert_type(double_a, double);
+    assert_type(str_a, const char *);
+
+    json_element null_b(move(null_a));
+    json_element bool_b(move(bool_a));
+    json_element int_b(move(int_a));
+    json_element uint_b(move(uint_a));
+    json_element double_b(move(double_a));
+    json_element str_b(move(str_a));
+
+    assert_type(null_a, nullptr_t);
+    assert_type(bool_a, nullptr_t);
+    assert_type(int_a, nullptr_t);
+    assert_type(uint_a, nullptr_t);
+    assert_type(double_a, nullptr_t);
+    assert_type(str_a, nullptr_t);
+
+    assert_type(null_b, nullptr_t);
+    assert_type(bool_b, bool);
+    assert_type(int_b, int);
+    assert_type(uint_b, uint);
+    assert_type(double_b, double);
+    assert_type(str_b, const char *);
+
+    ASSERT_EQ(true, bool_b.as<bool>());
+    ASSERT_EQ(ival, int_b.as<int>());
+    ASSERT_EQ(uval, uint_b.as<uint>());
+    ASSERT_DOUBLE_EQ(fval, double_b.as<double>());
+    ASSERT_STREQ(teststr, str_b.as<const char *>());
+
+    ASSERT_STREQ("null", null_a.as<const char *>());
+    ASSERT_STREQ("null", str_a.as<const char *>());
 }
