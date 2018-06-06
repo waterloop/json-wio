@@ -32,13 +32,6 @@ namespace wlp {
             m_data(static_cast<long double>(floating)),
             m_type(type_info<number_t>::value) {}
 
-        // copy and move constructors
-        json_variant(const json_variant &je);
-        json_variant(json_variant &&je);
-        // copy and move operators
-        json_variant &operator=(const json_variant &je);
-        json_variant &operator=(json_variant &&je);
-
         // string types
         explicit json_variant(char *str);
         explicit json_variant(char *str, size_type size);
