@@ -598,4 +598,3 @@ TEST(json_element, operators) {
     ASSERT_STREQ(str3, element.as<const char *>());
     ASSERT_EQ(dstr, element.as<dynamic_string>());
 }
-
