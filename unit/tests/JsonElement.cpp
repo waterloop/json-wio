@@ -544,3 +544,58 @@ TEST(json_element, move_operator) {
     ASSERT_STREQ(strval, b_str.as<const char *>());
 }
 
+TEST(json_element, operators) {
+    json_element element(static_cast<int>(10));
+    assert_type(element, int);
+    ASSERT_EQ(10, element.as<int>());
+
+    element = nullptr;
+    assert_type(element, nullptr_t);
+
+    element = true;
+    assert_type(element, bool);
+    ASSERT_EQ(true, element.as<bool>());
+
+    element = static_cast<char>('g');
+    assert_type(element, char);
+    ASSERT_EQ('g', element.as<char>());
+
+    element = static_cast<unsigned short>(43);
+    assert_type(element, unsigned short);
+    ASSERT_EQ(43, element.as<unsigned short>());
+
+    element = static_cast<long>(54333);
+    assert_type(element, long);
+    ASSERT_EQ(54333, element.as<int>());
+
+    constexpr float fval = -482.23f;
+    constexpr double dval = 5782723.124452;
+
+    element = fval;
+    assert_type(element, float);
+    ASSERT_FLOAT_EQ(fval, element.as<float>());
+
+    element = dval;
+    assert_type(element, double);
+    ASSERT_DOUBLE_EQ(dval, element.as<double>());
+
+    static char str1[] = "testing string 1";
+    static char str2[] = "2 string testing";
+
+    element = str1;
+    assert_type(element, const char *);
+    ASSERT_STREQ(str1, element.as<const char *>());
+
+    element = str2;
+    assert_type(element, char *);
+    ASSERT_STREQ(str2, element.as<char *>());
+
+    static char str3[] = "The tide of chaos stretches from the North";
+    dynamic_string dstr(str3);
+
+    element = dstr;
+    assert_type(element, dynamic_string);
+    ASSERT_STREQ(str3, element.as<const char *>());
+    ASSERT_EQ(dstr, element.as<dynamic_string>());
+}
+
