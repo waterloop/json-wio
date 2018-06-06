@@ -113,6 +113,9 @@ ASSERT_STREQ(strvar.as<char *>(), asstr);       \
 ASSERT_STREQ(strvar.as<const char *>(), asstr); \
 ASSERT_EQ(strvar.as<dynamic_string>(), dynamic_string(asstr))
 
+#define assert_nullinit(var)        \
+ASSERT_EQ(TYPE_NULL, var.type());
+
 /***************************************************
  * Data types
  **************************************************/
@@ -430,4 +433,168 @@ TEST(json_element, move_constructor) {
 
     ASSERT_STREQ("null", null_a.as<const char *>());
     ASSERT_STREQ("null", str_a.as<const char *>());
+}
+
+TEST(json_element, copy_operators) {
+    constexpr int ival = -5828474;
+    constexpr uint uval = 382478214;
+    constexpr double fval = -59382.23e-4;
+    static char strval[] = "testing string";
+
+    json_element a_null(nullptr);
+    json_element a_bool(true);
+    json_element a_int(ival);
+    json_element a_uint(uval);
+    json_element a_double(fval);
+    json_element a_str(strval);
+
+    json_element b_null;
+    json_element b_bool;
+    json_element b_int;
+    json_element b_uint;
+    json_element b_double;
+    json_element b_str;
+
+    assert_nullinit(b_null);
+    assert_nullinit(b_bool);
+    assert_nullinit(b_int);
+    assert_nullinit(b_uint);
+    assert_nullinit(b_double);
+    assert_nullinit(b_str);
+
+    b_null = a_null;
+    b_bool = a_bool;
+    b_int = a_int;
+    b_uint = a_uint;
+    b_double = a_double;
+    b_str = a_str;
+
+    assert_type(a_null, nullptr_t);
+    assert_type(a_bool, bool);
+    assert_type(a_int, int);
+    assert_type(a_uint, uint);
+    assert_type(a_double, double);
+    assert_type(a_str, const char *);
+
+    assert_type(b_null, nullptr_t);
+    assert_type(b_bool, bool);
+    assert_type(b_int, int);
+    assert_type(b_uint, uint);
+    assert_type(b_double, double);
+    assert_type(b_str, const char *);
+
+    ASSERT_EQ(true, b_bool.as<bool>());
+    ASSERT_EQ(ival, b_int.as<int>());
+    ASSERT_EQ(uval, b_uint.as<uint>());
+    ASSERT_DOUBLE_EQ(fval, b_double.as<double>());
+    ASSERT_STREQ(strval, b_str.as<const char *>());
+
+    ASSERT_EQ(true, a_bool.as<bool>());
+    ASSERT_EQ(ival, a_int.as<int>());
+    ASSERT_EQ(uval, a_uint.as<uint>());
+    ASSERT_DOUBLE_EQ(fval, a_double.as<double>());
+    ASSERT_STREQ(strval, a_str.as<const char *>());
+}
+
+TEST(json_element, move_operator) {
+    constexpr int ival = -5828474;
+    constexpr uint uval = 382478214;
+    constexpr double fval = -59382.23e-4;
+    static char strval[] = "testing string";
+
+    json_element a_null(nullptr);
+    json_element a_bool(true);
+    json_element a_int(ival);
+    json_element a_uint(uval);
+    json_element a_double(fval);
+    json_element a_str(strval);
+
+    json_element b_null;
+    json_element b_bool;
+    json_element b_int;
+    json_element b_uint;
+    json_element b_double;
+    json_element b_str;
+
+    b_null = move(a_null);
+    b_bool = move(a_bool);
+    b_int = move(a_int);
+    b_uint = move(a_uint);
+    b_double = move(a_double);
+    b_str = move(a_str);
+
+    assert_nullinit(a_null);
+    assert_nullinit(a_bool);
+    assert_nullinit(a_int);
+    assert_nullinit(a_uint);
+    assert_nullinit(a_double);
+    assert_nullinit(a_str);
+
+    assert_type(b_null, nullptr_t);
+    assert_type(b_bool, bool);
+    assert_type(b_int, int);
+    assert_type(b_uint, uint);
+    assert_type(b_double, double);
+    assert_type(b_str, const char *);
+
+    ASSERT_EQ(true, b_bool.as<bool>());
+    ASSERT_EQ(ival, b_int.as<int>());
+    ASSERT_EQ(uval, b_uint.as<uint>());
+    ASSERT_DOUBLE_EQ(fval, b_double.as<double>());
+    ASSERT_STREQ(strval, b_str.as<const char *>());
+}
+
+TEST(json_element, operators) {
+    json_element element(static_cast<int>(10));
+    assert_type(element, int);
+    ASSERT_EQ(10, element.as<int>());
+
+    element = nullptr;
+    assert_type(element, nullptr_t);
+
+    element = true;
+    assert_type(element, bool);
+    ASSERT_EQ(true, element.as<bool>());
+
+    element = static_cast<char>('g');
+    assert_type(element, char);
+    ASSERT_EQ('g', element.as<char>());
+
+    element = static_cast<unsigned short>(43);
+    assert_type(element, unsigned short);
+    ASSERT_EQ(43, element.as<unsigned short>());
+
+    element = static_cast<long>(54333);
+    assert_type(element, long);
+    ASSERT_EQ(54333, element.as<int>());
+
+    constexpr float fval = -482.23f;
+    constexpr double dval = 5782723.124452;
+
+    element = fval;
+    assert_type(element, float);
+    ASSERT_FLOAT_EQ(fval, element.as<float>());
+
+    element = dval;
+    assert_type(element, double);
+    ASSERT_DOUBLE_EQ(dval, element.as<double>());
+
+    static char str1[] = "testing string 1";
+    static char str2[] = "2 string testing";
+
+    element = str1;
+    assert_type(element, const char *);
+    ASSERT_STREQ(str1, element.as<const char *>());
+
+    element = str2;
+    assert_type(element, char *);
+    ASSERT_STREQ(str2, element.as<char *>());
+
+    static char str3[] = "The tide of chaos stretches from the North";
+    dynamic_string dstr(str3);
+
+    element = dstr;
+    assert_type(element, dynamic_string);
+    ASSERT_STREQ(str3, element.as<const char *>());
+    ASSERT_EQ(dstr, element.as<dynamic_string>());
 }

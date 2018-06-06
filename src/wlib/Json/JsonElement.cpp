@@ -53,6 +53,23 @@ json_element &json_element::operator=(json_element &&je) {
     je.m_type = TYPE_NULL;
 }
 
+// assignment operators
+json_element &json_element::operator=(nullptr_t) {
+    m_str.clear();
+    m_type = TYPE_NULL;
+}
+json_element &json_element::operator=(char *str) {
+    m_str = str;
+    m_type = TYPE_JSON_STRING;
+}
+json_element &json_element::operator=(const char *str) {
+    m_str = str;
+    m_type = TYPE_JSON_STRING;
+}
+json_element &json_element::operator=(const dynamic_string &str) {
+    m_str = str;
+    m_type = TYPE_JSON_STRING;
+}
 
 // json_type checks
 bool json_element::is_primitive() { return m_type < TYPE_JSON_STRING; }
