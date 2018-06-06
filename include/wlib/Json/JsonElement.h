@@ -196,13 +196,12 @@ namespace wlp {
         json_type type() const;
 
     public:
-        bool operator==(const json_element &o);
-        bool operator< (const json_element &o);
-
-        inline bool operator!=(const json_element &o) { return *this != o; }
-        inline bool operator> (const json_element &o) { return *this >  o; }
-        inline bool operator<=(const json_element &o) { return *this <= o; }
-        inline bool operator>=(const json_element &o) { return *this >= o; }
+        bool operator==(const json_element &o) const;
+        bool operator!=(const json_element &o) const;
+        bool operator< (const json_element &o) const;
+        bool operator> (const json_element &o) const;
+        bool operator<=(const json_element &o) const;
+        bool operator>=(const json_element &o) const;
 
     private:
         union data {
