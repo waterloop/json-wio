@@ -113,6 +113,9 @@ ASSERT_STREQ(strvar.as<char *>(), asstr);       \
 ASSERT_STREQ(strvar.as<const char *>(), asstr); \
 ASSERT_EQ(strvar.as<dynamic_string>(), dynamic_string(asstr))
 
+#define assert_nullinit(var)        \
+ASSERT_EQ(TYPE_NULL, var.type());
+
 /***************************************************
  * Data types
  **************************************************/
@@ -431,3 +434,65 @@ TEST(json_element, move_constructor) {
     ASSERT_STREQ("null", null_a.as<const char *>());
     ASSERT_STREQ("null", str_a.as<const char *>());
 }
+
+TEST(json_element, copy_operators) {
+    constexpr int ival = -5828474;
+    constexpr uint uval = 382478214;
+    constexpr double fval = -59382.23e-4;
+    static char strval[] = "testing string";
+
+    json_element a_null(nullptr);
+    json_element a_bool(true);
+    json_element a_int(ival);
+    json_element a_uint(uval);
+    json_element a_double(fval);
+    json_element a_str(strval);
+
+    json_element b_null;
+    json_element b_bool;
+    json_element b_int;
+    json_element b_uint;
+    json_element b_double;
+    json_element b_str;
+
+    assert_nullinit(b_null);
+    assert_nullinit(b_bool);
+    assert_nullinit(b_int);
+    assert_nullinit(b_uint);
+    assert_nullinit(b_double);
+    assert_nullinit(b_str);
+
+    b_null = a_null;
+    b_bool = a_bool;
+    b_int = a_int;
+    b_uint = a_uint;
+    b_double = a_double;
+    b_str = a_str;
+
+    assert_type(a_null, nullptr_t);
+    assert_type(a_bool, bool);
+    assert_type(a_int, int);
+    assert_type(a_uint, uint);
+    assert_type(a_double, double);
+    assert_type(a_str, const char *);
+
+    assert_type(b_null, nullptr_t);
+    assert_type(b_bool, bool);
+    assert_type(b_int, int);
+    assert_type(b_uint, uint);
+    assert_type(b_double, double);
+    assert_type(b_str, const char *);
+
+    ASSERT_EQ(true, b_bool.as<bool>());
+    ASSERT_EQ(ival, b_int.as<int>());
+    ASSERT_EQ(uval, b_uint.as<uint>());
+    ASSERT_DOUBLE_EQ(fval, b_double.as<double>());
+    ASSERT_STREQ(strval, b_str.as<const char *>());
+
+    ASSERT_EQ(true, a_bool.as<bool>());
+    ASSERT_EQ(ival, a_int.as<int>());
+    ASSERT_EQ(uval, a_uint.as<uint>());
+    ASSERT_DOUBLE_EQ(fval, a_double.as<double>());
+    ASSERT_STREQ(strval, a_str.as<const char *>());
+}
+

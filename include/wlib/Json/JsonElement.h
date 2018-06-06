@@ -32,13 +32,6 @@ namespace wlp {
             m_data(static_cast<long double>(floating)),
             m_type(type_info<number_t>::value) {}
 
-        // copy and move constructors
-        json_element(const json_element &je);
-        json_element(json_element &&je);
-        // copy and move operators
-        json_element &operator=(const json_element &je);
-        json_element &operator=(json_element &&je);
-
         // string types
         explicit json_element(char *str);
         explicit json_element(char *str, size_type size);
@@ -48,6 +41,45 @@ namespace wlp {
         template<size_type string_size>
         explicit json_element(const static_string<string_size> &str) :
             json_element(static_cast<const char *>(str.c_str()), str.length()) {}
+
+        // copy and move constructors
+        json_element(const json_element &je);
+        json_element(json_element &&je);
+
+        // null
+        json_element &operator=(nullptr_t);
+
+        // bool and integer types
+        template<typename number_t>
+        typename enable_type_if<
+            is_integral<number_t>::value,
+            json_element &>::type
+        operator=(number_t integer) {
+            m_data.integer = integer;
+            m_type = type_info<number_t>::value;
+            return *this;
+        }
+        // floating point types
+        template<typename number_t>
+        typename enable_type_if<
+            is_floating_point<number_t>::value,
+            json_element &>::type
+        operator=(number_t floating) {
+            m_data.floating = floating;
+            m_type = type_info<number_t>::value;
+            return *this;
+        }
+
+        // string types
+        json_element &operator=(char *str);
+        json_element &operator=(const char *str);
+        json_element &operator=(const dynamic_string &str);
+        template<size_type string_size>
+        json_element &operator=(const static_string<string_size> &str) { m_str = str; }
+
+        // copy and move operators
+        json_element &operator=(const json_element &je);
+        json_element &operator=(json_element &&je);
 
         // type checks
         bool is_primitive();
