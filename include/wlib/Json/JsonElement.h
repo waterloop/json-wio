@@ -1,5 +1,5 @@
-#ifndef __WLIB_JSON_JSONELEMENT_H__
-#define __WLIB_JSON_JSONELEMENT_H__
+#ifndef __WLIB_JSON_JSONVARIANT_H__
+#define __WLIB_JSON_JSONVARIANT_H__
 
 #include <float.h>
 
@@ -11,56 +11,56 @@
 
 namespace wlp {
 
-    class json_element {
+    class json_variant {
     public:
         // null
-        json_element();
-        explicit json_element(nullptr_t);
+        json_variant();
+        explicit json_variant(nullptr_t);
 
         // bool and integer types
         template<typename number_t, typename =
         typename enable_if<is_integral<number_t>::value
         >::type>
-        explicit json_element(number_t integer, char = 0) :
+        explicit json_variant(number_t integer, char = 0) :
             m_data(static_cast<long long>(integer)),
             m_type(type_info<number_t>::value) {}
         // floating point types
         template<typename number_t, typename =
         typename enable_if<is_floating_point<number_t>::value
         >::type>
-        explicit json_element(number_t floating, float = 0) :
+        explicit json_variant(number_t floating, float = 0) :
             m_data(static_cast<long double>(floating)),
             m_type(type_info<number_t>::value) {}
 
         // copy and move constructors
-        json_element(const json_element &je);
-        json_element(json_element &&je);
+        json_variant(const json_variant &je);
+        json_variant(json_variant &&je);
         // copy and move operators
-        json_element &operator=(const json_element &je);
-        json_element &operator=(json_element &&je);
+        json_variant &operator=(const json_variant &je);
+        json_variant &operator=(json_variant &&je);
 
         // string types
-        explicit json_element(char *str);
-        explicit json_element(char *str, size_type size);
-        explicit json_element(const char *str);
-        explicit json_element(const char *str, size_type size);
-        explicit json_element(const dynamic_string &str);
+        explicit json_variant(char *str);
+        explicit json_variant(char *str, size_type size);
+        explicit json_variant(const char *str);
+        explicit json_variant(const char *str, size_type size);
+        explicit json_variant(const dynamic_string &str);
         template<size_type string_size>
-        explicit json_element(const static_string<string_size> &str) :
-            json_element(static_cast<const char *>(str.c_str()), str.length()) {}
+        explicit json_variant(const static_string<string_size> &str) :
+            json_variant(static_cast<const char *>(str.c_str()), str.length()) {}
 
         // copy and move constructors
-        json_element(const json_element &je);
-        json_element(json_element &&je);
+        json_variant(const json_variant &je);
+        json_variant(json_variant &&je);
 
         // null
-        json_element &operator=(nullptr_t);
+        json_variant &operator=(nullptr_t);
 
         // bool and integer types
         template<typename number_t>
         typename enable_type_if<
             is_integral<number_t>::value,
-            json_element &>::type
+            json_variant &>::type
         operator=(number_t integer) {
             m_data.integer = integer;
             m_type = type_info<number_t>::value;
@@ -70,7 +70,7 @@ namespace wlp {
         template<typename number_t>
         typename enable_type_if<
             is_floating_point<number_t>::value,
-            json_element &>::type
+            json_variant &>::type
         operator=(number_t floating) {
             m_data.floating = floating;
             m_type = type_info<number_t>::value;
@@ -78,15 +78,15 @@ namespace wlp {
         }
 
         // string types
-        json_element &operator=(char *str);
-        json_element &operator=(const char *str);
-        json_element &operator=(const dynamic_string &str);
+        json_variant &operator=(char *str);
+        json_variant &operator=(const char *str);
+        json_variant &operator=(const dynamic_string &str);
         template<size_type string_size>
-        json_element &operator=(const static_string<string_size> &str) { m_str = str; }
+        json_variant &operator=(const static_string<string_size> &str) { m_str = str; }
 
         // copy and move operators
-        json_element &operator=(const json_element &je);
-        json_element &operator=(json_element &&je);
+        json_variant &operator=(const json_variant &je);
+        json_variant &operator=(json_variant &&je);
 
         // type checks
         bool is_primitive();
