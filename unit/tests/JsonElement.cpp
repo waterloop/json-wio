@@ -496,3 +496,51 @@ TEST(json_element, copy_operators) {
     ASSERT_STREQ(strval, a_str.as<const char *>());
 }
 
+TEST(json_element, move_operator) {
+    constexpr int ival = -5828474;
+    constexpr uint uval = 382478214;
+    constexpr double fval = -59382.23e-4;
+    static char strval[] = "testing string";
+
+    json_element a_null(nullptr);
+    json_element a_bool(true);
+    json_element a_int(ival);
+    json_element a_uint(uval);
+    json_element a_double(fval);
+    json_element a_str(strval);
+
+    json_element b_null;
+    json_element b_bool;
+    json_element b_int;
+    json_element b_uint;
+    json_element b_double;
+    json_element b_str;
+
+    b_null = move(a_null);
+    b_bool = move(a_bool);
+    b_int = move(a_int);
+    b_uint = move(a_uint);
+    b_double = move(a_double);
+    b_str = move(a_str);
+
+    assert_nullinit(a_null);
+    assert_nullinit(a_bool);
+    assert_nullinit(a_int);
+    assert_nullinit(a_uint);
+    assert_nullinit(a_double);
+    assert_nullinit(a_str);
+
+    assert_type(b_null, nullptr_t);
+    assert_type(b_bool, bool);
+    assert_type(b_int, int);
+    assert_type(b_uint, uint);
+    assert_type(b_double, double);
+    assert_type(b_str, const char *);
+
+    ASSERT_EQ(true, b_bool.as<bool>());
+    ASSERT_EQ(ival, b_int.as<int>());
+    ASSERT_EQ(uval, b_uint.as<uint>());
+    ASSERT_DOUBLE_EQ(fval, b_double.as<double>());
+    ASSERT_STREQ(strval, b_str.as<const char *>());
+}
+
