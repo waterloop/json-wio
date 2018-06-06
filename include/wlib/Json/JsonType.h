@@ -38,7 +38,7 @@ namespace wlp {
         TYPE_FLOAT = 0x3d,
         TYPE_DOUBLE = 0x3e,
         TYPE_LONG_DOUBLE = 0x3f,
-        
+
         TYPE_JSON_STRING = 0x40,
 
         TYPE_JSON_ARRAY = 0x50,
@@ -56,7 +56,7 @@ namespace wlp {
 
     template<typename type>
     struct type_info;
-    
+
     TYPE_DECL(TYPE_NULL, nullptr_t)
     TYPE_DECL(TYPE_BOOL, bool)
     TYPE_DECL(TYPE_CHAR, char)
@@ -73,13 +73,14 @@ namespace wlp {
     TYPE_DECL(TYPE_FLOAT, float)
     TYPE_DECL(TYPE_DOUBLE, double)
     TYPE_DECL(TYPE_LONG_DOUBLE, long double)
-    
-    TYPE_DECL(TYPE_JSON_STRING, char *)
     TYPE_DECL(TYPE_JSON_STRING, const char *)
-    TYPE_DECL(TYPE_JSON_STRING, dynamic_string)
-
     TYPE_DECL(TYPE_JSON_ARRAY, short *)
     TYPE_DECL(TYPE_JSON_OBJECT, int *)
+
+    template<>
+    struct type_info<char *> { static constexpr json_type value = TYPE_JSON_STRING; };
+    template<>
+    struct type_info<dynamic_string> { static constexpr json_type value = TYPE_JSON_STRING; };
 
     template<bool cond, typename target_t = void>
     struct enable_type_if {};
@@ -90,7 +91,7 @@ namespace wlp {
 
     template<typename target_t>
     constexpr bool is_string_type() {
-        return 
+        return
             is_same<char *, target_t>::value ||
             is_same<const char *, target_t>::value ||
             is_same<dynamic_string, target_t>::value;

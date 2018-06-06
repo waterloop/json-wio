@@ -13,8 +13,9 @@
  **************************************************/
 #define cast(type, v) static_cast<type>(v)
 
-#define assert_type(var, type) \
-ASSERT_EQ(type_info<type>::value, var.type());
+#define assert_type(var, type_t)                \
+{ json_type _type_ = type_info<type_t>::value;  \
+  ASSERT_EQ(_type_, var.type()); }
 
 #define decl_je(name, type, val) \
 static json_element name(static_cast<type>(val))
@@ -405,7 +406,28 @@ TEST(json_element, move_constructor) {
     json_element int_b(move(int_a));
     json_element uint_b(move(uint_a));
     json_element double_b(move(double_a));
+    json_element str_b(move(str_a));
 
+    assert_type(null_a, nullptr_t);
+    assert_type(bool_a, nullptr_t);
+    assert_type(int_a, nullptr_t);
+    assert_type(uint_a, nullptr_t);
+    assert_type(double_a, nullptr_t);
+    assert_type(str_a, nullptr_t);
 
+    assert_type(null_b, nullptr_t);
+    assert_type(bool_b, bool);
+    assert_type(int_b, int);
+    assert_type(uint_b, uint);
+    assert_type(double_b, double);
+    assert_type(str_b, const char *);
 
+    ASSERT_EQ(true, bool_b.as<bool>());
+    ASSERT_EQ(ival, int_b.as<int>());
+    ASSERT_EQ(uval, uint_b.as<uint>());
+    ASSERT_DOUBLE_EQ(fval, double_b.as<double>());
+    ASSERT_STREQ(teststr, str_b.as<const char *>());
+
+    ASSERT_STREQ("null", null_a.as<const char *>());
+    ASSERT_STREQ("null", str_a.as<const char *>());
 }

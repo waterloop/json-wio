@@ -22,14 +22,14 @@ namespace wlp {
         typename enable_if<is_integral<number_t>::value
         >::type>
         explicit json_element(number_t integer, char = 0) :
-            m_integer(integer),
+            m_data(static_cast<long long>(integer)),
             m_type(type_info<number_t>::value) {}
         // floating point types
         template<typename number_t, typename =
         typename enable_if<is_floating_point<number_t>::value
         >::type>
         explicit json_element(number_t floating, float = 0) :
-            m_floating(floating),
+            m_data(static_cast<long double>(floating)),
             m_type(type_info<number_t>::value) {}
 
         // copy and move constructors
@@ -166,10 +166,13 @@ namespace wlp {
         json_type type() const;
 
     private:
-        union {
-            long long m_integer;
-            long double m_floating;
-        };
+        union data {
+            data();
+            explicit data(long long i);
+            explicit data(long double f);
+            long long integer;
+            long double floating;
+        } m_data;
         dynamic_string m_str;
         json_type m_type;
     };

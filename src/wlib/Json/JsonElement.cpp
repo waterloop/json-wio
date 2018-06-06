@@ -8,6 +8,11 @@
 
 using namespace wlp;
 
+// union constructors
+json_element::data::data() {}
+json_element::data::data(long long i) : integer(i) {}
+json_element::data::data(long double f) : floating(f) {}
+
 // null constructor
 json_element::json_element() :
     m_type(TYPE_NULL) {}
@@ -30,11 +35,24 @@ json_element::json_element(const dynamic_string &str) :
     m_str(str),
     m_type(TYPE_JSON_STRING) {}
 
-// copy and move constructors and operators
+// copy constructor and operator
 json_element::json_element(const json_element &) = default;
-json_element::json_element(json_element &&) = default;
 json_element &json_element::operator=(const json_element &) = default;
-json_element &json_element::operator=(json_element &&) = default;
+
+// move constructor and operator
+json_element::json_element(json_element &&je) :
+    m_data(move(je.m_data)),
+    m_str(move(je.m_str)),
+    m_type(move(je.m_type)) {
+    je.m_type = TYPE_NULL;
+}
+json_element &json_element::operator=(json_element &&je) {
+    m_data = move(je.m_data);
+    m_str = move(je.m_str);
+    m_type = move(je.m_type);
+    je.m_type = TYPE_NULL;
+}
+
 
 // json_type checks
 bool json_element::is_primitive() { return m_type < TYPE_JSON_STRING; }
@@ -206,8 +224,9 @@ dynamic_string json_element::convert_to_dynamic_string() {
     return m_str;
 }
 
-long long json_element::integer() const { return m_integer; }
-long double json_element::floating() const { return m_floating; }
+long long json_element::integer() const { return m_data.integer; }
+long double json_element::floating() const { return m_data.floating; }
 dynamic_string &json_element::str() { return m_str; }
 const dynamic_string &json_element::str() const { return m_str; }
 json_type json_element::type() const { return m_type; }
+
