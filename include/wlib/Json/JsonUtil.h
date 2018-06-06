@@ -13,8 +13,8 @@
 
 namespace wlp {
 
-    bool string_is_int(const char *str);
-    bool string_is_float(const char *str);
+    extern bool string_is_int(const char *str);
+    extern bool string_is_float(const char *str);
 
     class json_element;
 

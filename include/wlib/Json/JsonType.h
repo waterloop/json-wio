@@ -16,6 +16,12 @@ struct type_info<type_t> {                      \
     static constexpr json_type value = type_v;  \
 };
 
+#define TYPE_INFO(type_v, type_t)               \
+template<>                                      \
+struct type_info<type_t> {                      \
+    static constexpr json_type value = type_v;  \
+};
+
 namespace wlp {
 
     enum json_type : unsigned char {
@@ -77,10 +83,8 @@ namespace wlp {
     TYPE_DECL(TYPE_JSON_ARRAY, short *)
     TYPE_DECL(TYPE_JSON_OBJECT, int *)
 
-    template<>
-    struct type_info<char *> { static constexpr json_type value = TYPE_JSON_STRING; };
-    template<>
-    struct type_info<dynamic_string> { static constexpr json_type value = TYPE_JSON_STRING; };
+    TYPE_INFO(TYPE_JSON_STRING, char *)
+    TYPE_INFO(TYPE_JSON_STRING, dynamic_string)
 
     template<bool cond, typename target_t = void>
     struct enable_type_if {};
