@@ -1,9 +1,6 @@
 #include <stdio.h>
-#include <string.h>
+#include <float.h>
 
-#include <wlib/hash>
-
-#include <wlib/Json/JsonType.h>
 #include <wlib/Json/JsonElement.h>
 
 using namespace wlp;
@@ -247,42 +244,3 @@ long double json_element::floating() const { return m_data.floating; }
 dynamic_string &json_element::str() { return m_str; }
 const dynamic_string &json_element::str() const { return m_str; }
 json_type json_element::type() const { return m_type; }
-
-// functors
-namespace element_hash {
-    typedef size_type (*hash_function)(const json_element &);
-    static size_type of_null(const json_element &) { return 0; }
-    static size_type of_int(const json_element &je) {
-        return static_cast<size_type>(je.integer());
-    }
-    static size_type of_float(const json_element &je) {
-        static_assert(
-            sizeof(long double) >= sizeof(size_type),
-            "Expecting sizeof long double to be at least sizeof wlp::size_type");
-
-        long double floating = je.floating();
-        return *reinterpret_cast<size_type *>(&floating);
-    }
-    static size_type of_str(const json_element &je) {
-        return hash_string<size_type>(je.str().c_str());
-    }
-    static size_type of_arr(const json_element &je) {
-        return 0;
-    }
-    static size_type of_obj(const json_element &je) {
-        return 0;
-    }
-    static hash_function hashers[json_type::NUM_CLASS] = {
-        of_null, of_int, of_int, 
-        of_float, of_str,
-        of_arr, of_obj
-    };
-}
-
-size_type json_element_hash::operator()(const json_element &je) const {
-    return element_hash::hashers[je.type() >> 4](je);
-}
-
-namespace element_equals {
-    typedef bool (*equals_function)(const json_element &, const json_element &);
-}
