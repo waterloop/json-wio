@@ -229,3 +229,66 @@ TEST(json_object, move_insert) {
     ASSERT_EQ(val, *obj.find(key));
 }
 
+TEST(json_object, implicit_insert) {
+    json_object obj;
+
+    obj.insert("key1", 111);
+    obj.insert("key2", 222);
+    obj.insert("key3", 333);
+
+    ASSERT_EQ(3, obj.size());
+
+    constexpr int sum = 111 + 222 + 333;
+    int val = sum;
+    for (auto it = obj.begin(); it != obj.end(); ++it) {
+        val -= it->as<int>();
+    }
+    ASSERT_EQ(0, val);
+
+    json_element key1("key1");
+    json_element key2("key2");
+    json_element key3("key3");
+
+    ASSERT_NE(obj.end(), obj.find(key1));
+    ASSERT_NE(obj.end(), obj.find(key2));
+    ASSERT_NE(obj.end(), obj.find(key3));
+
+    auto ret1 = obj.insert("key4", 444);
+    ASSERT_TRUE(ret1.second());
+    ASSERT_EQ(444, ret1.first()->as<int>());
+
+    auto ret2 = obj.insert("key3", 666);
+    ASSERT_FALSE(ret2.second());
+    ASSERT_EQ(333, ret2.first()->as<int>());
+}
+
+TEST(json_object, implicit_insert_or_assign) {
+    json_object obj;
+
+    json_element e1(222);
+    json_element e2(111);
+
+    e2 = move(e1);
+
+    ASSERT_EQ(e2.as<int>(), 222);
+
+    auto ret1 = obj.insert_or_assign("key1", 111);
+    ASSERT_EQ(1, obj.size());
+    ASSERT_TRUE(ret1.second());
+    ASSERT_EQ(111, ret1.first()->as<int>());
+
+    auto it = obj.find("key1");
+    ASSERT_NE(obj.end(), it);
+    ASSERT_EQ(it->as<int>(), 111);
+
+    auto ret2 = obj.insert("key1", 222);
+    ASSERT_EQ(1, obj.size());
+    ASSERT_FALSE(ret2.second());
+    ASSERT_EQ(111, ret2.first()->as<int>());
+
+    auto ret3 = obj.insert_or_assign("key1", 111);
+    ASSERT_EQ(1, obj.size());
+    ASSERT_FALSE(ret3.second());
+    ASSERT_EQ(111, ret3.first()->as<int>());
+}
+

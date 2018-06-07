@@ -18,34 +18,34 @@ namespace wlp {
 
         // null constructors
         json_element();
-        explicit json_element(nullptr_t);
+        json_element(nullptr_t);
 
         // bool and integer type constructors
         template<typename number_t, typename =
         typename enable_if<is_integral<number_t>::value
         >::type>
-        explicit json_element(number_t integer, bool = 0) :
+        json_element(number_t integer, bool = 0) :
             m_integer(static_cast<json_int>(integer)),
             m_type(type_info<number_t>::value) {}
         // floating point type constructors
         template<typename number_t, typename =
         typename enable_if<is_floating_point<number_t>::value
         >::type>
-        explicit json_element(number_t floating, char = 0) :
+        json_element(number_t floating, char = 0) :
             m_floating(static_cast<json_float>(floating)),
             m_type(type_info<number_t>::value) {}
 
         // string type constructors
-        explicit json_element(char *str);
-        explicit json_element(char *str, size_type size);
-        explicit json_element(const char *str);
-        explicit json_element(const char *str, size_type size);
-        explicit json_element(const dynamic_string &str);
-        explicit json_element(dynamic_string &&str);
+        json_element(char *str);
+        json_element(char *str, size_type size);
+        json_element(const char *str);
+        json_element(const char *str, size_type size);
+        json_element(const dynamic_string &str);
+        json_element(dynamic_string &&str);
 
         // static string
         template<size_type string_size>
-        explicit json_element(const static_string<string_size> &str) :
+        json_element(const static_string<string_size> &str) :
             json_element(static_cast<const char*>(str.c_str()), str.length()) {}
 
         // copy constructor and operator
