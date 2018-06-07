@@ -290,5 +290,38 @@ TEST(json_object, implicit_insert_or_assign) {
     ASSERT_EQ(1, obj.size());
     ASSERT_FALSE(ret3.second());
     ASSERT_EQ(111, ret3.first()->as<int>());
+
+    json_element key("hellokey");
+    ASSERT_TRUE(obj.insert_or_assign("hellokey", "value").second());
+    ASSERT_STREQ("value", obj[key].as<const char *>());
+
+    ASSERT_FALSE(obj.insert_or_assign("hellokey", "anothervalue").second());
+    ASSERT_STREQ("anothervalue", obj[key].as<const char *>());
 }
 
+TEST(json_object, implicit_erase) {
+    json_object obj;
+    obj.insert("first", "apple");
+    obj.insert("second", "banana");
+    obj.insert("third", "candy");
+
+    obj.insert(5, 1234);
+    obj.insert(nullptr, 0);
+
+    ASSERT_EQ(5, obj.size());
+
+    json_element key;
+    ASSERT_EQ(0, obj[key].as<int>());
+
+    key = 5;
+    ASSERT_EQ(1234, obj[key].as<int>());
+
+    key = "third";
+    ASSERT_STREQ("candy", obj[key].as<const char *>());
+
+    key = "second";
+    ASSERT_STREQ("banana", obj[key].as<const char *>());
+
+    key = "first";
+    ASSERT_STREQ("apple", obj[key].as<const char *>());
+}
