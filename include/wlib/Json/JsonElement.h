@@ -5,13 +5,17 @@
 #include <wlib/utility>
 
 #include <wlib/Json/JsonDefine.h>
-#include <wlib/Json/JsonUtil.h>
 #include <wlib/Json/JsonType.h>
+#include <wlib/Json/JsonObject.h>
+#include <wlib/Json/JsonArray.h>
 
 namespace wlp {
 
     class json_element {
     public:
+        // destructor
+        ~json_element();
+
         // null constructors
         json_element();
         explicit json_element(nullptr_t);
@@ -48,7 +52,7 @@ namespace wlp {
         json_element(const json_element &je);
         json_element &operator=(const json_element &je);
 
-        // move constructor and operator        
+        // move constructor and operator
         json_element(json_element &&je);
         json_element &operator=(json_element &&je);
 
@@ -61,7 +65,7 @@ namespace wlp {
             is_integral<number_t>::value &&
             !is_same<json_int, number_t>::value,
             json_element &>::type
-        operator=(number_t i) 
+        operator=(number_t i)
         { return assign(static_cast<json_int>(i), type_info<number_t>::value); }
         // floating point types
         template<typename number_t>
@@ -69,9 +73,9 @@ namespace wlp {
             is_floating_point<number_t>::value &&
             !is_same<json_float, number_t>::value,
             json_element &>::type
-        operator=(number_t f) 
+        operator=(number_t f)
         { return assign(static_cast<json_float>(f), type_info<number_t>::value); }
-        
+
     private:
         json_element &assign(json_int i, json_type type);
         json_element &assign(json_float f, json_type type);

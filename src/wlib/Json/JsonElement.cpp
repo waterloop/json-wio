@@ -52,24 +52,28 @@ namespace destroy {
     };
 }
 
+// destructor
+json_element::~json_element()
+{ destroy::functions[m_type >> 4](this); }
+
 // assignment jump tables
 namespace copy_assign {
     typedef void (*data_copier)(json_element *, const json_element &);
     static void copy_null(json_element *, const json_element &) {}
-    static void copy_int(json_element *dst, const json_elememt &src) {
+    static void copy_int(json_element *dst, const json_element &src) {
         dst->integer() = src.integer();
     }
     static void copy_float(json_element *dst, const json_element &src) {
         dst->floating() = src.floating();
     }
     static void copy_string(json_element *dst, const json_element &src) {
-        dst->string() = src.string();
+        ::new(&dst->string()) dynamic_string(src.string());
     }
     static void copy_array(json_element *dst, const json_element &src) {
-        dst->array() = src.array();
+        //::new(&dst->array()) json_array(src.array());
     }
     static void copy_object(json_element *dst, const json_element &src) {
-        dst->object() = src.object();
+        //::new(&dst->object()) json_object(src.object());
     }
     static data_copier functions[json_type::NUM_CLASS] = {
         copy_null, copy_int, copy_int,
@@ -87,13 +91,13 @@ namespace move_assign {
         dst->floating() = move(src.floating());
     }
     static void move_string(json_element *dst, json_element &&src) {
-        dst->string() = move(src.string());
+        ::new(&dst->string()) dynamic_string(move(src.string()));
     }
     static void move_array(json_element *dst, json_element &&src) {
-        dst->array() = move(src.array());
+        ::new(&dst->array()) json_array(move(src.array()));
     }
     static void move_object(json_element *dst, json_element &&src) {
-        dst->object() = move(src.object());
+        ::new(&dst->object()) json_object(move(src.object()));
     }
     static data_mover functions[json_type::NUM_CLASS] = {
         move_null, move_int, move_int,
@@ -190,25 +194,25 @@ bool json_element::is_object() { return m_type == TYPE_JSON_OBJECT; }
 
 // string content checking
 bool json_element::is_string_null() {
-    return m_str.length() == STR_SIZE_NULL &&
-           m_str == STR_NULL;
+    return m_string.length() == STR_SIZE_NULL &&
+           m_string == STR_NULL;
 }
 bool json_element::is_string_true() {
-    return m_str.length() == STR_SIZE_TRUE &&
-           m_str == STR_TRUE;
+    return m_string.length() == STR_SIZE_TRUE &&
+           m_string == STR_TRUE;
 }
 bool json_element::is_string_false() {
-    return m_str.length() == STR_SIZE_FALSE &&
-           m_str == STR_FALSE;
+    return m_string.length() == STR_SIZE_FALSE &&
+           m_string == STR_FALSE;
 }
 bool json_element::is_string_bool() {
     return is_string_true() || is_string_false();
 }
 bool json_element::is_string_int() {
-    return string_is_int(m_str.c_str());
+    return string_is_int(m_string.c_str());
 }
 bool json_element::is_string_float() {
-    return string_is_float(m_str.c_str());
+    return string_is_float(m_string.c_str());
 }
 bool json_element::is_string_array() {
     return false;
@@ -223,7 +227,7 @@ bool json_element::convertible_to_null() {
 }
 bool json_element::convertible_to_bool() {
     return m_type <= TYPE_LONG_DOUBLE ||
-    (is_string() && (!m_str.length() || is_string_bool()));
+    (is_string() && (!m_string.length() || is_string_bool()));
 }
 bool json_element::convertible_to_int() {
     return m_type <= TYPE_UNSIGNED_LONG_LONG ||
@@ -260,7 +264,7 @@ namespace convert_int {
     static json_int from_float(json_element *je)
     { return static_cast<json_int>(je->floating()); }
     static json_int from_str(json_element *je)
-    { return strtoll(je->str().c_str(), nullptr, 10); }
+    { return strtoll(je->string().c_str(), nullptr, 10); }
     static json_int from_arr(json_element *je)
     { return je->array().size(); }
     static json_int from_obj(json_element *je)
@@ -279,7 +283,7 @@ namespace convert_float {
     static json_float from_float(json_element *je)
     { return je->floating(); }
     static json_float from_str(json_element *je)
-    { return strtold(je->str().c_str(), nullptr); }
+    { return strtold(je->string().c_str(), nullptr); }
     static json_float from_arr(json_element *je)
     { return static_cast<json_float>(je->array().size()); }
     static json_float from_obj(json_element *je)
@@ -334,4 +338,6 @@ json_array &json_element::array()
 json_object &json_element::object()
 { return m_object; }
 
-json_type json_element::type() { return m_type; }
+json_type json_element::type() const
+{ return m_type; }
+

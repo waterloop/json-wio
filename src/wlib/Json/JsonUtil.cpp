@@ -35,7 +35,7 @@ namespace element_hash {
         return *reinterpret_cast<size_type *>(&floating);
     }
     static size_type of_str(const json_element &je) {
-        return hash_string<size_type>(je.str().c_str());
+        return hash_string<size_type>(je.string().c_str());
     }
     static size_type of_arr(const json_element &) {
         return 0;
