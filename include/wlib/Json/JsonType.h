@@ -24,7 +24,9 @@ struct type_info<type_t> {                      \
 
 namespace wlp {
 
-    enum json_type : unsigned char {
+    typedef unsigned char json_type_t;
+
+    enum json_type : json_type_t {
         TYPE_NULL = 0x00,
 
         TYPE_BOOL = 0x11,

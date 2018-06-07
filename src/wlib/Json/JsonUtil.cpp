@@ -1,5 +1,4 @@
 #include <stdlib.h>
-
 #include <wlib/hash>
 
 #include <wlib/Json/JsonElement.h>
@@ -29,10 +28,10 @@ namespace element_hash {
     }
     static size_type of_float(const json_element &je) {
         static_assert(
-            sizeof(long double) >= sizeof(size_type),
-            "Expecting sizeof long double to be at least sizeof wlp::size_type");
+            sizeof(json_float) >= sizeof(size_type),
+            "Expecting sizeof json_float to be at least sizeof wlp::size_type");
 
-        long double floating = je.floating();
+        json_float floating = je.floating();
         return *reinterpret_cast<size_type *>(&floating);
     }
     static size_type of_str(const json_element &je) {
@@ -55,7 +54,9 @@ size_type json_element_hash::operator()(const json_element &je) const {
     return element_hash::hashers[je.type() >> 4](je);
 }
 
-bool json_element_equals::operator()(const json_element &je1, const json_element &je2) const {
+bool json_element_equals::operator()(
+    const json_element &je1,
+    const json_element &je2) const {
     return je1 == je2;
 }
 
