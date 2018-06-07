@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.1.0)
 project(json-wio)
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_BUILD_TYPE Debug)
 
 set(WLIB_DIR ${CMAKE_CURRENT_LIST_DIR}/.wio/node_modules/wlib-wio)
 set(JSON_DIR ${CMAKE_CURRENT_LIST_DIR})
@@ -24,7 +25,7 @@ file(GLOB_RECURSE JSON_FILES
 add_library(json ${JSON_FILES})
 target_link_libraries(json wlib)
 target_compile_definitions(json PUBLIC WLIB_USE_LONG_DOUBLE)
-target_include_directories(json PUBLIC 
+target_include_directories(json PUBLIC
     ${JSON_DIR}/include
     ${WLIB_DIR}/include
     )
@@ -37,8 +38,8 @@ file(GLOB_RECURSE UNIT_FILES
 
 add_executable(unit ${UNIT_FILES})
 target_link_libraries(unit json wlib gtest)
-target_include_directories(unit PUBLIC 
+target_include_directories(unit PUBLIC
     ${WLIB_DIR}/include
     ${JSON_DIR}/include
-    ${GTEST_DIR}/include   
+    ${GTEST_DIR}/include
     )
