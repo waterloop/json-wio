@@ -34,7 +34,7 @@ ASSERT_EQ(var.type(), type_v)
   asfunc(a, b); }
 
 #define assert_je_datastr(var, val) \
-{ auto a = var.str().c_str();       \
+{ auto a = var.string().c_str();    \
   ASSERT_STREQ(a, val); }
 
 #define assert_je_typecheck(var,                \
@@ -74,10 +74,10 @@ ASSERT_EQ(var.convertible_to<char *>(), tostr);         \
 ASSERT_EQ(var.convertible_to<dynamic_string>(), tostr);
 
 #define assert_je_ct_int(nvar) \
-assert_je_ct(nvar, false, true, true, true, true)
+assert_je_ct(nvar, false, true, true, true, false)
 
 #define assert_je_ct_float(nvar) \
-assert_je_ct(nvar, false, true, false, true, true)
+assert_je_ct(nvar, false, true, false, true, false)
 
 #define assert_je_ct_str(strvar) \
 assert_je_ct(strvar, false, false, false, false, true)
@@ -267,8 +267,8 @@ TEST(json_element, json_type_checks) {
 }
 
 TEST(json_element, convertible_to) {
-    assert_je_ct(null_e, true, true, true, true, true);
-    assert_je_ct(bool_e, false, true, true, true, true);
+    assert_je_ct(null_e, true, true, true, true, false);
+    assert_je_ct(bool_e, false, true, true, true, false);
     assert_je_ct_int(char_e);
     assert_je_ct_int(s_char_e);
     assert_je_ct_int(s_short_e);
@@ -296,23 +296,23 @@ TEST(json_element, convertible_to) {
 
 TEST(json_element, as) {
     constexpr int g_ord = cast(int, 'g');
-    assert_je_as(null_e, nullptr, false, 0, 0, 0, "null");
-    assert_je_as(false_e, nullptr, false, 0, 0, 0, "false");
-    assert_je_as(bool_e, nullptr, true, 1, 1, 1.0, "true");
-    assert_je_as_u(char_e, nullptr, true, g_ord, g_ord, "103");
-    assert_je_as_u(s_char_e, nullptr, true, -10, -10.0f, "-10");
-    assert_je_as_u(s_short_e, nullptr, true, -11, -11.0f, "-11");
-    assert_je_as_u(s_int_e, nullptr, true, -12, -12.0f, "-12");
-    assert_je_as_u(s_long_e, nullptr, true, -13, -13.0f, "-13");
-    assert_je_as_u(s_lli_e, nullptr, true, -14, -14.0f, "-14");
-    assert_je_as_u(u_char_e, nullptr, true, 10, 10.0f, "10");
-    assert_je_as_u(u_short_e, nullptr, true, 11, 11.0f, "11");
-    assert_je_as_u(u_int_e, nullptr, true, 12, 12.0f, "12");
-    assert_je_as_u(u_long_e, nullptr, true, 13, 13.0f, "13");
-    assert_je_as_u(u_lli_e, nullptr, true, 14, 14.0f, "14");
-    assert_je_as_u(float_e, nullptr, true, 12, 12.12f, "12.120000");
-    assert_je_as_u(double_e, nullptr, true, 13, 13.13, "13.130000");
-    assert_je_as_u(longdbl_e, nullptr, true, 14, 14.14, "14.140000");
+    assert_je_as(null_e, nullptr, false, 0, 0, 0, nullptr);
+    assert_je_as(false_e, nullptr, false, 0, 0, 0, nullptr);
+    assert_je_as(bool_e, nullptr, true, 1, 1, 1.0, nullptr);
+    assert_je_as_u(char_e, nullptr, true, g_ord, g_ord, nullptr);
+    assert_je_as_u(s_char_e, nullptr, true, -10, -10.0f, nullptr);
+    assert_je_as_u(s_short_e, nullptr, true, -11, -11.0f, nullptr);
+    assert_je_as_u(s_int_e, nullptr, true, -12, -12.0f, nullptr);
+    assert_je_as_u(s_long_e, nullptr, true, -13, -13.0f, nullptr);
+    assert_je_as_u(s_lli_e, nullptr, true, -14, -14.0f, nullptr);
+    assert_je_as_u(u_char_e, nullptr, true, 10, 10.0f, nullptr);
+    assert_je_as_u(u_short_e, nullptr, true, 11, 11.0f, nullptr);
+    assert_je_as_u(u_int_e, nullptr, true, 12, 12.0f, nullptr);
+    assert_je_as_u(u_long_e, nullptr, true, 13, 13.0f, nullptr);
+    assert_je_as_u(u_lli_e, nullptr, true, 14, 14.0f, nullptr);
+    assert_je_as_u(float_e, nullptr, true, 12, 12.12f, nullptr);
+    assert_je_as_u(double_e, nullptr, true, 13, 13.13, nullptr);
+    assert_je_as_u(longdbl_e, nullptr, true, 14, 14.14, nullptr);
     assert_je_as_str(c_str_e, TEST_STR1);
     assert_je_as_str(d_str_e, TEST_STR2);
     assert_je_as_str(s_str_e, TEST_STR3);
@@ -329,9 +329,7 @@ TEST(json_element, copy_constructor) {
     json_element null_copy(null_source);
 
     ASSERT_EQ(TYPE_NULL, null_copy.type());
-    ASSERT_STREQ("null", null_copy.as<const char *>());
     ASSERT_EQ(TYPE_NULL, null_source.type());
-    ASSERT_STREQ("null", null_source.as<const char *>());
 
     json_element bool_source(true);
     json_element bool_copy(bool_source);
@@ -381,7 +379,6 @@ TEST(json_element, copy_constructor) {
 TEST(json_element, default_constructor) {
     json_element var;
     ASSERT_EQ(TYPE_NULL, var.type());
-    ASSERT_STREQ("null", var.as<const char *>());
 }
 
 TEST(json_element, move_constructor) {
@@ -431,8 +428,8 @@ TEST(json_element, move_constructor) {
     ASSERT_DOUBLE_EQ(fval, double_b.as<double>());
     ASSERT_STREQ(teststr, str_b.as<const char *>());
 
-    ASSERT_STREQ("null", null_a.as<const char *>());
-    ASSERT_STREQ("null", str_a.as<const char *>());
+    ASSERT_STREQ(nullptr, null_a.as<const char *>());
+    ASSERT_STREQ(nullptr, str_a.as<const char *>());
 }
 
 TEST(json_element, copy_operators) {
