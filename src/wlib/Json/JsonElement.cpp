@@ -92,6 +92,7 @@ namespace move_assign {
     }
     static void move_string(json_element *dst, json_element &&src) {
         ::new(&dst->string()) dynamic_string(move(src.string()));
+        src.string().~dynamic_string();
     }
     static void move_array(json_element *dst, json_element &&src) {
         ::new(&dst->array()) json_array(move(src.array()));
