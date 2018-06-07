@@ -53,8 +53,8 @@ namespace wlp {
         json_element &operator=(const json_element &je);
 
         // move constructor and operator
-        json_element(json_element &&je);
-        json_element &operator=(json_element &&je);
+        json_element(json_element &&je) noexcept;
+        json_element &operator=(json_element &&je) noexcept;
 
         // null assignment
         json_element &operator=(nullptr_t);

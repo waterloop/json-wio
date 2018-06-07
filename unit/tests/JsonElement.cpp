@@ -428,8 +428,8 @@ TEST(json_element, move_constructor) {
     ASSERT_DOUBLE_EQ(fval, double_b.as<double>());
     ASSERT_STREQ(teststr, str_b.as<const char *>());
 
-    ASSERT_STREQ("null", null_a.as<const char *>());
-    ASSERT_STREQ("null", str_a.as<const char *>());
+    ASSERT_STREQ(nullptr, null_a.as<const char *>());
+    ASSERT_STREQ(nullptr, str_a.as<const char *>());
 }
 
 TEST(json_element, copy_operators) {

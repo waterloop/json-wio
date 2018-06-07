@@ -69,10 +69,10 @@ namespace copy_assign {
     static void copy_string(json_element *dst, const json_element &src) {
         ::new(&dst->string()) dynamic_string(src.string());
     }
-    static void copy_array(json_element *dst, const json_element &src) {
+    static void copy_array(json_element */*dst*/, const json_element &src) {
         //::new(&dst->array()) json_array(src.array());
     }
-    static void copy_object(json_element *dst, const json_element &src) {
+    static void copy_object(json_element */*dst*/, const json_element &src) {
         //::new(&dst->object()) json_object(src.object());
     }
     static data_copier functions[json_type::NUM_CLASS] = {
@@ -83,7 +83,7 @@ namespace copy_assign {
 }
 namespace move_assign {
     typedef void (*data_mover)(json_element *, json_element &&);
-    static void move_null(json_element *dst, json_element &&src) {}
+    static void move_null(json_element *, json_element &&) {}
     static void move_int(json_element *dst, json_element &&src) {
         dst->integer() = move(src.integer());
     }
@@ -111,7 +111,7 @@ json_element::json_element(const json_element &je) :
     m_type(je.m_type) {
     copy_assign::functions[m_type >> 4](this, je);
 }
-json_element::json_element(json_element &&je) :
+json_element::json_element(json_element &&je) noexcept :
     m_type(move(je.m_type)) {
     move_assign::functions[m_type >> 4](this, move(je));
     je.m_type = TYPE_NULL;
@@ -124,10 +124,11 @@ json_element &json_element::operator=(const json_element &je) {
     copy_assign::functions[m_type >> 4](this, je);
     return *this;
 }
-json_element &json_element::operator=(json_element &&je) {
+json_element &json_element::operator=(json_element &&je) noexcept {
     destroy::functions[m_type >> 4](this);
     m_type = move(je.m_type);
     move_assign::functions[m_type >> 4](this, move(je));
+    je.m_type = TYPE_NULL;
     return *this;
 }
 
@@ -154,7 +155,7 @@ json_element &json_element::assign(json_float f, json_type type) {
 // string assignment
 json_element &json_element::assign(const char *str, size_type len) {
     destroy::functions[m_type >> 4](this);
-    m_string.set_value(str, len);
+    ::new(&m_string) dynamic_string(str, len);
     m_type = TYPE_JSON_STRING;
     return *this;
 }
@@ -313,7 +314,7 @@ const char *json_element::convert_to_string() {
 
 // handle conversion to dynamic_string
 dynamic_string json_element::convert_to_dynamic_string()
-{ return m_string; }
+{ return is_string() ? m_string : dynamic_string(nullptr); }
 
 // getters
 const json_int &json_element::integer() const
@@ -340,4 +341,3 @@ json_object &json_element::object()
 
 json_type json_element::type() const
 { return m_type; }
-
