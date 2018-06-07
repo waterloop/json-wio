@@ -6,6 +6,67 @@
 
 using namespace wlp;
 
+TEST(json_object, move_constructor) {
+    json_object obj;
+
+    json_element k1("key1");
+    json_element k2("key2");
+    json_element v1(24);
+    json_element v2(75);
+
+    obj.insert(k1, v1);
+    obj.insert(k2, v2);
+
+    ASSERT_EQ(2, obj.size());
+    ASSERT_NE(obj.end(), obj.find(k1));
+    ASSERT_NE(obj.end(), obj.find(k2));
+    ASSERT_EQ(v1, *obj.find(k1));
+    ASSERT_EQ(v2, *obj.find(k2));
+
+    json_object moved(move(obj));
+
+    ASSERT_EQ(0, obj.size());
+    ASSERT_EQ(0, obj.capacity());
+    ASSERT_EQ(obj.begin(), obj.end());
+
+    ASSERT_EQ(2, moved.size());
+    ASSERT_NE(moved.end(), moved.find(k1));
+    ASSERT_NE(moved.end(), moved.find(k2));
+    ASSERT_EQ(v1, *moved.find(k1));
+    ASSERT_EQ(v2, *moved.find(k2));
+}
+
+TEST(json_object, move_operator) {
+    json_element k1("key1");
+    json_element k2("key2");
+    json_element v1("val1");
+    json_element v2("val2");
+
+    json_object o1;
+    json_object o2;
+
+    o1.insert(k1, v1);
+    o2.insert(k2, v2);
+
+    ASSERT_EQ(1, o1.size());
+    ASSERT_EQ(1, o2.size());
+
+    ASSERT_NE(o1.end(), o1.find(k1));
+    ASSERT_EQ(o1.end(), o1.find(k2));
+    ASSERT_NE(o2.end(), o2.find(k2));
+    ASSERT_EQ(o2.end(), o2.find(k1));
+
+    o1 = move(o2);
+
+    ASSERT_EQ(0, o2.size());
+    ASSERT_EQ(0, o2.capacity());
+    ASSERT_EQ(o2.begin(), o2.end());
+
+    ASSERT_EQ(1, o1.size());
+    ASSERT_EQ(o1.end(), o1.find(k1));
+    ASSERT_NE(o1.end(), o1.find(k2));
+}
+
 TEST(json_object, null_keys) {
     json_object obj;
 

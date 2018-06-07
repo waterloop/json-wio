@@ -5,11 +5,6 @@
 
 using namespace wlp;
 
-// union constructors
-json_element::data::data() {}
-json_element::data::data(long long i) : integer(i) {}
-json_element::data::data(long double f) : floating(f) {}
-
 // null constructor
 json_element::json_element() :
     m_type(TYPE_NULL) {}

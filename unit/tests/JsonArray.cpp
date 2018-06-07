@@ -6,6 +6,72 @@
 
 using namespace wlp;
 
+TEST(json_array, move_constructor) {
+    json_array arr;
+
+    json_element e1;
+    json_element e2(true);
+    json_element e3(4);
+    json_element e4(-5);
+    json_element e5(25.5);
+    json_element e6("hello");
+
+    arr.push_back(e1);
+    arr.push_back(e2);
+    arr.push_back(e3);
+    arr.push_back(e4);
+    arr.push_back(e5);
+    arr.push_back(e6);
+
+    ASSERT_EQ(6, arr.size());
+    ASSERT_NE(arr.end(), arr.find(e3));
+    ASSERT_EQ(arr.begin(), arr.find(e1));
+
+    json_array moved(move(arr));
+    ASSERT_EQ(0, arr.size());
+    ASSERT_EQ(arr.begin(), arr.end());
+
+    ASSERT_EQ(6, moved.size());
+    ASSERT_EQ(moved.begin(), moved.find(e1));
+    ASSERT_NE(moved.end(), moved.find(e2));
+    ASSERT_NE(moved.end(), moved.find(e3));
+    ASSERT_NE(moved.end(), moved.find(e4));
+}
+
+TEST(json_array, move_operator) {
+    json_array arr1;
+    json_array arr2;
+
+    json_element e1(1);
+    json_element e2(2);
+    json_element e3(3);
+    json_element e4(4);
+    json_element e5(5);
+    json_element e6(6);
+
+    arr1.push_back(e1);
+    arr1.push_back(e2);
+    arr1.push_back(e3);
+    arr1.push_back(e4);
+    arr2.push_back(e5);
+    arr2.push_back(e6);
+
+    ASSERT_EQ(2, arr2.size());
+    ASSERT_EQ(4, arr1.size());
+
+    ASSERT_NE(arr2.end(), arr2.find(e5));
+    ASSERT_NE(arr1.end(), arr1.find(e2));
+    ASSERT_EQ(arr2.end(), arr2.find(e2));
+
+    arr2 = move(arr1);
+
+    ASSERT_EQ(0, arr1.size());
+    ASSERT_EQ(arr1.begin(), arr1.end());
+
+    ASSERT_EQ(4, arr2.size());
+    ASSERT_NE(arr2.end(), arr2.find(e2));
+}
+
 TEST(json_array, null_elements) {
     json_array arr;
 

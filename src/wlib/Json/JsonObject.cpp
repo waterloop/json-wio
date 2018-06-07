@@ -8,7 +8,8 @@ json_object::json_object(
     json_object::percent_type load) :
     hash_map(n, load) {}
 
-json_object::json_object(json_object &&obj) : hash_map(move(obj)) {}
+json_object::json_object(json_object &&obj) :
+    hash_map(move(obj)) {}
 
 json_object &json_object::operator=(json_object &&obj) {
     hash_map::operator=(move(obj));

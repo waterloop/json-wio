@@ -24,13 +24,12 @@ namespace wlp {
     public:
         explicit json_object(
             size_type n = JSON_OBJECT_DEFAULT_SIZE,
-            percent_type load = JSON_OBJECT_DEFAULT_LOAD
-        );
+            percent_type load = JSON_OBJECT_DEFAULT_LOAD);
 
         json_object(json_object &&obj);
-        json_object(const json_object &) = delete;
-
         json_object &operator=(json_object &&obj);
+
+        json_object(const json_object &) = delete;
         json_object &operator=(const json_object &) = delete;
     };
 
