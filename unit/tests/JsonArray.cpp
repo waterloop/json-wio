@@ -185,3 +185,36 @@ TEST(json_array, string_elements) {
     ASSERT_EQ(arr[2], e3);
 }
 
+TEST(json_array, implicit_operations) {
+    json_array arr;
+    arr.push_back("second");
+    arr.push_back("third");
+    arr.push_front("first");
+
+    ASSERT_EQ("first", arr[0]);
+    ASSERT_EQ("second", arr[1]);
+    ASSERT_EQ("third", arr[2]);
+
+    ASSERT_EQ(3, arr.size());
+
+    auto it = arr.insert(1, "middle");
+    ASSERT_EQ("middle", arr[1]);
+    ASSERT_EQ("second", arr[2]);
+
+    ++it;
+    arr.insert(it, "movesecond");
+
+    ASSERT_EQ(5, arr.size());
+    ASSERT_EQ("movesecond", arr[2]);
+    ASSERT_EQ("second", arr[3]);
+
+    auto ret = arr.find("mot");
+    ASSERT_EQ(arr.end(), ret);
+
+    ret = arr.find("second");
+    ASSERT_NE(arr.end(), ret);
+    ASSERT_EQ("second", *ret);
+
+    ASSERT_EQ(3, arr.index_of("second"));
+}
+
