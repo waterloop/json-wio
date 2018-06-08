@@ -77,7 +77,7 @@ TEST(json_compare, equality_int) {
     ASSERT_EQ(val1, a.as<int>());
     ASSERT_EQ(val2, b.as<int>());
     ASSERT_EQ(val3, c.as<int>());
-    ASSERT_EQ(val3, c.as<unsigned int>());
+    ASSERT_EQ(static_cast<unsigned int>(val3), c.as<unsigned int>());
     ASSERT_EQ(val4, d.as<int>());
     ASSERT_EQ(val4, d.as<long>());
     ASSERT_EQ(val4, d.as<unsigned short>());

@@ -324,4 +324,29 @@ TEST(json_object, implicit_erase) {
 
     key = "first";
     ASSERT_STREQ("apple", obj[key].as<const char *>());
+
+    ASSERT_TRUE(obj.erase("first"));
+    ASSERT_EQ(4, obj.size());
+    ASSERT_EQ(obj.end(), obj.find(key));
+
+    key = "second";
+    ASSERT_TRUE(obj.erase("second"));
+    ASSERT_EQ(3, obj.size());
+    ASSERT_EQ(obj.end(), obj.find(key));
+
+    key = "third";
+    ASSERT_TRUE(obj.erase("third"));
+    ASSERT_EQ(2, obj.size());
+    ASSERT_EQ(obj.end(), obj.find(key));
+
+    key = 5;
+    ASSERT_TRUE(obj.erase(5));
+    ASSERT_EQ(1, obj.size());
+    ASSERT_EQ(obj.end(), obj.find(key));
+
+    key = nullptr;
+    ASSERT_TRUE(obj.erase(nullptr));
+    ASSERT_EQ(0, obj.size());
+    ASSERT_EQ(obj.end(), obj.find(key));
 }
+

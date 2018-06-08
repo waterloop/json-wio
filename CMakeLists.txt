@@ -4,6 +4,8 @@ project(json-wio)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_BUILD_TYPE Debug)
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g -O0")
+
 set(WLIB_DIR ${CMAKE_CURRENT_LIST_DIR}/.wio/node_modules/wlib-wio)
 set(JSON_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(GTEST_DIR ${CMAKE_CURRENT_LIST_DIR}/googletest/googletest)
