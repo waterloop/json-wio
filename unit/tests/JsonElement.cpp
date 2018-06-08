@@ -595,3 +595,180 @@ TEST(json_element, operators) {
     ASSERT_STREQ(str3, var.as<const char *>());
     ASSERT_EQ(dstr, var.as<dynamic_string>());
 }
+
+TEST(json_element, implicit_equals) {
+    json_element element_null;
+    json_element element_bool(true);
+    json_element element_int(-50);
+    json_element element_float(60.70);
+    json_element element_string("hello");
+
+    ASSERT_TRUE(element_null == nullptr);
+    ASSERT_FALSE(element_null == true);
+    ASSERT_FALSE(element_null == 10);
+    ASSERT_FALSE(element_null == 50.56);
+    ASSERT_FALSE(element_null == "hello");
+
+    ASSERT_FALSE(element_bool == nullptr);
+    ASSERT_FALSE(element_bool == false);
+    ASSERT_TRUE(element_bool == true);
+    ASSERT_FALSE(element_bool == 24);
+    ASSERT_FALSE(element_bool == 60.67);
+    ASSERT_FALSE(element_bool == "55677");
+
+    ASSERT_FALSE(element_int == nullptr);
+    ASSERT_FALSE(element_int == true);
+    ASSERT_FALSE(element_int == 10);
+    ASSERT_TRUE(element_int == -50);
+    ASSERT_FALSE(element_int == 44.44);
+    ASSERT_FALSE(element_int == "hello");
+
+    ASSERT_FALSE(element_float == nullptr);
+    ASSERT_FALSE(element_float == true);
+    ASSERT_FALSE(element_float == 60);
+    ASSERT_FALSE(element_float == -555.555);
+    ASSERT_TRUE(element_float == 60.70);
+    ASSERT_FALSE(element_float == "hello");
+
+    ASSERT_FALSE(element_string == nullptr);
+    ASSERT_FALSE(element_string == true);
+    ASSERT_FALSE(element_string == 10);
+    ASSERT_FALSE(element_string == 10.555);
+    ASSERT_FALSE(element_string == "noway");
+    ASSERT_TRUE(element_string == "hello");
+
+    ASSERT_TRUE(element_int == static_cast<short>(-50));
+    ASSERT_TRUE(element_int == static_cast<long>(-50));
+
+    json_element zero_float(0.0f);
+    ASSERT_TRUE(zero_float == 0.0);
+    ASSERT_TRUE(zero_float == 0.0f);
+
+    dynamic_string hello("hello");
+    ASSERT_TRUE(element_string == hello);
+
+    ASSERT_TRUE(zero_float != 10.0);
+}
+
+TEST(json_element, implicit_less) {
+    ASSERT_FALSE(null_e < nullptr);
+    ASSERT_FALSE(bool_e < false);
+    ASSERT_FALSE(bool_e < true);
+    ASSERT_TRUE(false_e < true);
+    ASSERT_TRUE(null_e < 10);
+    ASSERT_TRUE(bool_e < 10);
+    json_element e_int(50);
+    ASSERT_FALSE(e_int < nullptr);
+    ASSERT_FALSE(e_int < true);
+    ASSERT_TRUE(e_int < 70);
+    ASSERT_FALSE(e_int < 20);
+    ASSERT_TRUE(e_int < 66.666);
+    json_element e_float(45.56f);
+    ASSERT_FALSE(e_float < nullptr);
+    ASSERT_FALSE(e_float < true);
+    ASSERT_FALSE(e_float < 10000);
+    ASSERT_FALSE(e_float < 20.0);
+    ASSERT_TRUE(e_float < 100.0f);
+    ASSERT_TRUE(e_float < 1000.0);
+    ASSERT_TRUE(e_float < "hello");
+    json_element str("hohohoho");
+    ASSERT_TRUE(str < "zzozozo");
+    ASSERT_FALSE(str < "aasdfasd");
+    ASSERT_FALSE(str < 35.3553);
+}
+
+TEST(json_element, implicit_comparisons) {
+    json_element e1(4);
+    json_element e2(55.55);
+    json_element e3("hello");
+
+    ASSERT_TRUE(e1 == 4);
+    ASSERT_TRUE(4 == e1);
+    ASSERT_FALSE(e1 == 3);
+    ASSERT_FALSE(3 == e1);
+
+    ASSERT_TRUE(e2 == 55.55);
+    ASSERT_TRUE(55.55 == e2);
+    ASSERT_FALSE(e2 == 44.44);
+    ASSERT_FALSE(44.44 == e2);
+
+    ASSERT_TRUE(e3 == "hello");
+    ASSERT_TRUE("hello" == e3);
+    ASSERT_FALSE(e3 == "womba");
+    ASSERT_FALSE("womba" == e3);
+
+    ASSERT_TRUE(e1 != 3);
+    ASSERT_TRUE(3 != e1);
+    ASSERT_FALSE(e1 != 4);
+    ASSERT_FALSE(4 != e1);
+
+    ASSERT_TRUE(e2 != 2.22);
+    ASSERT_TRUE(2.22 != e2);
+    ASSERT_FALSE(e2 != 55.55);
+    ASSERT_FALSE(e2 != 55.55);
+
+    ASSERT_TRUE(e3 != "womba");
+    ASSERT_TRUE("womba" != e3);
+    ASSERT_FALSE(e3 != "hello");
+    ASSERT_FALSE("hello" != e3);
+
+    ASSERT_TRUE(e1 < 5);
+    ASSERT_TRUE(2 < e1);
+    ASSERT_FALSE(e1 < 1);
+    ASSERT_FALSE(10 < e1);
+
+    ASSERT_TRUE(e2 < 66.66);
+    ASSERT_TRUE(33.33 < e2);
+    ASSERT_FALSE(e2 < -55.55);
+    ASSERT_FALSE(77.77 < e2);
+
+    ASSERT_TRUE(e3 < "zoppa");
+    ASSERT_TRUE("ahaha" < e3);
+    ASSERT_FALSE(e3 < "apppa");
+    ASSERT_FALSE("zoppa" < e3);
+
+    ASSERT_TRUE(e1 > 1);
+    ASSERT_TRUE(10 > e1);
+    ASSERT_FALSE(e1 > 1000);
+    ASSERT_FALSE(-40 > e1);
+
+    ASSERT_TRUE(e2 > -50.0);
+    ASSERT_TRUE(500.00 > e2);
+    ASSERT_FALSE(e2 > 5000.0);
+    ASSERT_FALSE(-20.0 > e2);
+
+    ASSERT_TRUE(e3 > "apple");
+    ASSERT_TRUE("zebra" > e3);
+    ASSERT_FALSE(e3 > "zebra");
+    ASSERT_FALSE("apple" > e3);
+    
+    ASSERT_TRUE(e1 <= 5);
+    ASSERT_TRUE(2 <= e1);
+    ASSERT_FALSE(e1 <= 1);
+    ASSERT_FALSE(10 <= e1);
+
+    ASSERT_TRUE(e2 <= 66.66);
+    ASSERT_TRUE(33.33 <= e2);
+    ASSERT_FALSE(e2 <= -55.55);
+    ASSERT_FALSE(77.77 <= e2);
+
+    ASSERT_TRUE(e3 <= "zoppa");
+    ASSERT_TRUE("ahaha" <= e3);
+    ASSERT_FALSE(e3 <= "apppa");
+    ASSERT_FALSE("zoppa" <= e3);
+
+    ASSERT_TRUE(e1 >= 1);
+    ASSERT_TRUE(10 >= e1);
+    ASSERT_FALSE(e1 >= 1000);
+    ASSERT_FALSE(-40 >= e1);
+
+    ASSERT_TRUE(e2 >= -50.0);
+    ASSERT_TRUE(500.00 >= e2);
+    ASSERT_FALSE(e2 >= 5000.0);
+    ASSERT_FALSE(-20.0 >= e2);
+
+    ASSERT_TRUE(e3 >= "apple");
+    ASSERT_TRUE("zebra" >= e3);
+    ASSERT_FALSE(e3 >= "zebra");
+    ASSERT_FALSE("apple" >= e3);
+}

@@ -182,76 +182,69 @@ template<json_type lo, json_type hi>
 static bool between(json_type i)
 { return lo <= i && i <= hi; }
 
-bool json_element::is_null() { return m_type == TYPE_NULL; }
-bool json_element::is_bool() { return m_type == TYPE_BOOL; }
-bool json_element::is_int()
+bool json_element::is_null() const { return m_type == TYPE_NULL; }
+bool json_element::is_bool() const { return m_type == TYPE_BOOL; }
+bool json_element::is_int() const
 { return between<TYPE_CHAR, TYPE_UNSIGNED_LONG_LONG>(m_type); }
-bool json_element::is_float()
+bool json_element::is_float() const
 { return between<TYPE_FLOAT, TYPE_LONG_DOUBLE>(m_type); }
-bool json_element::is_number()
+bool json_element::is_number() const
 { return between<TYPE_CHAR, TYPE_LONG_DOUBLE>(m_type); }
-bool json_element::is_string() { return m_type == TYPE_JSON_STRING; }
-bool json_element::is_array() { return m_type == TYPE_JSON_ARRAY; }
-bool json_element::is_object() { return m_type == TYPE_JSON_OBJECT; }
+bool json_element::is_string() const { return m_type == TYPE_JSON_STRING; }
+bool json_element::is_array() const { return m_type == TYPE_JSON_ARRAY; }
+bool json_element::is_object() const { return m_type == TYPE_JSON_OBJECT; }
 
 // string content checking
-bool json_element::is_string_null() {
-    return m_string.length() == STR_SIZE_NULL &&
-           m_string == STR_NULL;
-}
-bool json_element::is_string_true() {
-    return m_string.length() == STR_SIZE_TRUE &&
-           m_string == STR_TRUE;
-}
-bool json_element::is_string_false() {
-    return m_string.length() == STR_SIZE_FALSE &&
-           m_string == STR_FALSE;
-}
-bool json_element::is_string_bool() {
-    return is_string_true() || is_string_false();
-}
-bool json_element::is_string_int() {
-    return string_is_int(m_string.c_str());
-}
-bool json_element::is_string_float() {
-    return string_is_float(m_string.c_str());
-}
-bool json_element::is_string_array() {
-    return false;
-}
-bool json_element::is_string_object() {
-    return false;
-}
+bool json_element::is_string_null() const
+{ return m_string.length() == STR_SIZE_NULL && m_string == STR_NULL; }
+bool json_element::is_string_true() const
+{ return m_string.length() == STR_SIZE_TRUE && m_string == STR_TRUE; }
+bool json_element::is_string_false() const
+{ return m_string.length() == STR_SIZE_FALSE && m_string == STR_FALSE; }
+bool json_element::is_string_bool() const
+{ return is_string_true() || is_string_false(); }
+bool json_element::is_string_int() const
+{ return string_is_int(m_string.c_str()); }
+bool json_element::is_string_float() const
+{ return string_is_float(m_string.c_str()); }
+bool json_element::is_string_array() const
+{ return false; }
+bool json_element::is_string_object() const
+{ return false; }
 
 // conversion checks
-bool json_element::convertible_to_null() {
-    return is_null() || (is_string() && is_string_null());
-}
-bool json_element::convertible_to_bool() {
+bool json_element::convertible_to_null() const
+{ return is_null() || (is_string() && is_string_null()); }
+bool json_element::convertible_to_bool() const {
     return m_type <= TYPE_LONG_DOUBLE ||
     (is_string() && (!m_string.length() || is_string_bool()));
 }
-bool json_element::convertible_to_int() {
+bool json_element::convertible_to_int() const {
     return m_type <= TYPE_UNSIGNED_LONG_LONG ||
     (is_string() && is_string_int());
 }
-bool json_element::convertible_to_float() {
+bool json_element::convertible_to_float() const {
     return m_type <= TYPE_LONG_DOUBLE ||
     (is_string() && is_string_float());
 }
-bool json_element::convertible_to_string() {
-    return is_string();
-}
+bool json_element::convertible_to_string() const
+{ return is_string(); }
 
 // type conversions
 namespace convert_bool {
-    typedef bool (*type)(json_element *);
-    static bool from_null(json_element *) { return false; }
-    static bool from_int(json_element *je) { return static_cast<bool>(je->integer()); }
-    static bool from_float(json_element *je) { return static_cast<bool>(je->floating()); }
-    static bool from_str(json_element *je) { return je->is_string_true(); }
-    static bool from_arr(json_element *je) { return !je->array().empty(); }
-    static bool from_obj(json_element *je) { return !je->object().empty(); }
+    typedef bool (*type)(const json_element *);
+    static bool from_null(const json_element *)
+    { return false; }
+    static bool from_int(const json_element *je)
+    { return static_cast<bool>(je->integer()); }
+    static bool from_float(const json_element *je)
+    { return static_cast<bool>(je->floating()); }
+    static bool from_str(const json_element *je)
+    { return je->is_string_true(); }
+    static bool from_arr(const json_element *je)
+    { return !je->array().empty(); }
+    static bool from_obj(const json_element *je)
+    { return !je->object().empty(); }
     static type converter[json_type::NUM_CLASS] = {
         from_null, from_int, from_int,
         from_float, from_str,
@@ -259,17 +252,18 @@ namespace convert_bool {
     };
 }
 namespace convert_int {
-    typedef json_int (*type)(json_element *);
-    static json_int from_null(json_element *) { return 0; }
-    static json_int from_int(json_element *je)
+    typedef json_int (*type)(const json_element *);
+    static json_int from_null(const json_element *)
+    { return 0; }
+    static json_int from_int(const json_element *je)
     { return je->integer(); }
-    static json_int from_float(json_element *je)
+    static json_int from_float(const json_element *je)
     { return static_cast<json_int>(je->floating()); }
-    static json_int from_str(json_element *je)
+    static json_int from_str(const json_element *je)
     { return strtoll(je->string().c_str(), nullptr, 10); }
-    static json_int from_arr(json_element *je)
+    static json_int from_arr(const json_element *je)
     { return je->array().size(); }
-    static json_int from_obj(json_element *je)
+    static json_int from_obj(const json_element *je)
     { return je->object().size(); }
     static type converter[json_type::NUM_CLASS] = {
         from_null, from_int, from_int,
@@ -278,17 +272,18 @@ namespace convert_int {
     };
 }
 namespace convert_float {
-    typedef json_float (*type)(json_element *);
-    static json_float from_null(json_element *) { return 0; }
-    static json_float from_int(json_element *je)
+    typedef json_float (*type)(const json_element *);
+    static json_float from_null(const json_element *)
+    { return 0; }
+    static json_float from_int(const json_element *je)
     { return static_cast<json_float>(je->integer()); }
-    static json_float from_float(json_element *je)
+    static json_float from_float(const json_element *je)
     { return je->floating(); }
-    static json_float from_str(json_element *je)
+    static json_float from_str(const json_element *je)
     { return strtold(je->string().c_str(), nullptr); }
-    static json_float from_arr(json_element *je)
+    static json_float from_arr(const json_element *je)
     { return static_cast<json_float>(je->array().size()); }
-    static json_float from_obj(json_element *je)
+    static json_float from_obj(const json_element *je)
     { return static_cast<json_float>(je->object().size()); }
     static type converter[json_type::NUM_CLASS] = {
         from_null, from_int, from_int,
@@ -297,24 +292,19 @@ namespace convert_float {
     };
 }
 
-nullptr_t json_element::convert_to_null() {
-    return nullptr;
-}
-bool json_element::convert_to_bool() {
-    return convert_bool::converter[m_type >> 4](this);
-}
-json_int json_element::convert_to_int() {
-    return convert_int::converter[m_type >> 4](this);
-}
-json_float json_element::convert_to_float() {
-    return convert_float::converter[m_type >> 4](this);
-}
-const char *json_element::convert_to_string() {
-    return is_string() ? m_string.c_str() : nullptr;
-}
+nullptr_t json_element::convert_to_null() const
+{ return nullptr; }
+bool json_element::convert_to_bool() const
+{ return convert_bool::converter[m_type >> 4](this); }
+json_int json_element::convert_to_int() const
+{ return convert_int::converter[m_type >> 4](this); }
+json_float json_element::convert_to_float() const
+{ return convert_float::converter[m_type >> 4](this); }
+const char *json_element::convert_to_string() const 
+{ return is_string() ? m_string.c_str() : nullptr; }
 
 // handle conversion to dynamic_string
-dynamic_string json_element::convert_to_dynamic_string()
+dynamic_string json_element::convert_to_dynamic_string() const
 { return is_string() ? m_string : dynamic_string(nullptr); }
 
 // getters

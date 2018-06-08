@@ -350,3 +350,57 @@ TEST(json_object, implicit_erase) {
     ASSERT_EQ(obj.end(), obj.find(key));
 }
 
+TEST(json_object, implicit_at) {
+    json_object obj;
+    obj.insert("first", 1);
+    obj.insert("second", 2);
+    obj.insert("third", 3);
+    obj.insert("fourth", 4);
+    obj.insert("fifth", 5);
+
+    ASSERT_EQ(1, obj.at("first").as<int>());
+    ASSERT_EQ(2, obj.at("second").as<int>());
+    ASSERT_EQ(3, obj.at("third").as<int>());
+    ASSERT_EQ(4, obj.at("fourth").as<int>());
+    ASSERT_EQ(5, obj.at("fifth").as<int>());
+
+    json_object cobj;
+    cobj.insert("hello", 4);
+    const json_object mobj = move(cobj);
+    ASSERT_EQ(4, mobj.at("hello").as<int>());
+}
+
+TEST(json_object, implicit_contains) {
+    json_object obj;
+    obj.insert("hello", 4);
+    ASSERT_TRUE(obj.contains("hello"));
+    ASSERT_FALSE(obj.contains("goodbye"));
+}
+
+TEST(json_object, implicit_find) {
+    json_object obj;
+    obj.insert("hello", 1);
+    obj.insert("goodbye", 5);
+    ASSERT_NE(obj.end(), obj.find("hello"));
+    ASSERT_EQ(obj.end(), obj.find("moshi"));
+    const json_object cobj = move(obj);
+    ASSERT_EQ(cobj.end(), cobj.find("who"));
+    ASSERT_EQ(1, cobj.find("hello")->as<int>());
+}
+
+TEST(json_object, implicit_access) {
+    json_object obj;
+    obj.insert("one", 1);
+    obj.insert("two", 2.2);
+    obj.insert("three", 3.45f);
+
+    ASSERT_EQ(1, obj["one"].as<int>());
+    ASSERT_DOUBLE_EQ(2.2, obj["two"].as<double>());
+    ASSERT_FLOAT_EQ(3.45f, obj["three"].as<float>());
+
+    obj["three"] = 4;
+    ASSERT_EQ(4, obj.find("three")->as<int>());
+
+    obj["nine"] = "hello";
+    ASSERT_STREQ("hello", obj.find("nine")->as<const char *>());
+}
