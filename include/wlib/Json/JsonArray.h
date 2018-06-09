@@ -29,7 +29,7 @@ namespace wlp {
 
         template<typename ...args>
         json_array(args &&...values) : array_list(sizeof...(args)) 
-        { swallow(prv_push_back(values)...); }
+        { swallow(prv_push_back(forward<args>(values))...); }
 
         template<typename val_t>
         iterator insert(size_type i, val_t &&val)
