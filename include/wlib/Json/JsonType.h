@@ -26,6 +26,16 @@ namespace wlp {
 
     typedef unsigned char json_type_t;
 
+    enum json_class : json_type_t {
+        CLASS_NULL = 0x0,
+        CLASS_BOOL = 0x1,
+        CLASS_INT = 0x2,
+        CLASS_FLOAT = 0x3,
+        CLASS_STRING = 0x4,
+        CLASS_ARRAY = 0x5,
+        CLASS_OBJECT = 0x6
+    };
+
     enum json_type : json_type_t {
         TYPE_NULL = 0x00,
 

@@ -772,3 +772,111 @@ TEST(json_element, implicit_comparisons) {
     ASSERT_FALSE(e3 >= "zebra");
     ASSERT_FALSE("apple" >= e3);
 }
+
+TEST(json_element, convertible_to_array_object) {
+    json_element element(10);
+    ASSERT_FALSE(element.convertible_to<json_array>());
+    ASSERT_FALSE(element.convertible_to<json_object>());
+}
+
+TEST(json_element, convert_to_array) {
+    json_element not_arr("hello");
+    ASSERT_EQ(0, not_arr.as<json_array>().size());
+    json_array array;
+    array.push_back(1);
+    array.push_back("hello");
+    array.push_back(24.4);
+    json_element is_arr(move(array));
+    ASSERT_EQ(3, is_arr.as<json_array>().size());
+    ASSERT_EQ(0, array.size());
+}
+
+TEST(json_element, convert_to_object) {
+    json_element not_obj("hello");
+    ASSERT_EQ(0, not_obj.as<json_object>().size());
+    json_object obj;
+    obj["first"] = 1;
+    obj["second"] = 2;
+    obj["third"] = 3;
+    json_element is_obj(move(obj));
+    ASSERT_EQ(3, is_obj.as<json_object>().size());
+    ASSERT_EQ(0, obj.size());
+}
+
+TEST(json_element, implicit_bool) {
+    bool res1 = null_e;
+    ASSERT_FALSE(res1);
+    bool res2 = false_e;
+    ASSERT_FALSE(res2);
+    bool res3 = bool_e;
+    ASSERT_TRUE(res3);
+
+    json_element integer(50);
+    bool res4 = integer;
+    ASSERT_TRUE(res4);
+    json_element zero(0);
+    bool res5 = zero;
+    ASSERT_FALSE(res5);
+
+    json_array arr1;
+    json_element arr_e(move(arr1));
+    bool res6 = arr_e;
+    ASSERT_FALSE(res6);
+
+    json_array arr2;
+    arr2.push_back(2);
+    arr_e = move(arr2);
+    bool res7 = arr_e;
+    ASSERT_TRUE(res7);
+    
+    if (integer) {}
+    else { FAIL(); }
+
+    if (!integer) { FAIL(); }
+    else {}
+}
+
+TEST(json_element, implicit_int) {
+    json_element ival1(40);
+    int val1 = ival1;
+
+    ASSERT_EQ(40, ival1);
+    ASSERT_EQ(40, val1);
+
+    json_element ival2(-500);
+    long long val2 = ival2;
+    ASSERT_EQ(-500, val2);
+}
+
+TEST(json_element, implicit_float) {
+    json_element fval1(60.605f);
+    float val1 = fval1;
+    ASSERT_FLOAT_EQ(60.605f, val1);
+    
+    json_element fval2(-40.404);
+    double val2 = fval2;
+    ASSERT_DOUBLE_EQ(-40.404, val2);
+}
+
+TEST(json_element, implicit_string) {
+    json_element strval1("hello");
+    const char *val1 = strval1;
+    ASSERT_STREQ("hello", val1);
+
+    json_element strval2("the end is nigh!");
+    char *val2 = strval2;
+    ASSERT_STREQ("the end is nigh!", val2);
+}
+
+TEST(json_element, null_access) {
+    json_object obj;
+    obj[nullptr] = 5;
+    json_element el(move(obj));
+
+    ASSERT_EQ(5, el[nullptr]);
+    ASSERT_EQ(5, el[null_e]);
+}
+
+TEST(json_element, int_access) {
+    json_array arr = {1, 2.0, "hello"};
+}

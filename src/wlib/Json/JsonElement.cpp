@@ -182,7 +182,7 @@ json_element &json_element::operator=(const dynamic_string &str)
 
 json_element &json_element::operator=(dynamic_string &&str) {
     destroy::functions[m_type >> 4](this);
-    m_string = move(str);
+    ::new(&m_string) dynamic_string(move(str));
     m_type = TYPE_JSON_STRING;
     return *this;
 }
@@ -190,13 +190,13 @@ json_element &json_element::operator=(dynamic_string &&str) {
 // json array and object
 json_element &json_element::operator=(json_array &&arr) {
     destroy::functions[m_type >> 4](this);
-    m_array = move(arr);
+    ::new(&m_array) json_array(move(arr));
     m_type = TYPE_JSON_ARRAY;
     return *this;
 }
 json_element &json_element::operator=(json_object &&obj) {
     destroy::functions[m_type >> 4](this);
-    m_object = move(obj);
+    ::new(&m_object) json_object(move(obj));
     m_type = TYPE_JSON_OBJECT;
     return *this;
 }
@@ -208,10 +208,8 @@ static bool between(json_type i)
 
 bool json_element::is_null() const { return m_type == TYPE_NULL; }
 bool json_element::is_bool() const { return m_type == TYPE_BOOL; }
-bool json_element::is_int() const
-{ return between<TYPE_CHAR, TYPE_UNSIGNED_LONG_LONG>(m_type); }
-bool json_element::is_float() const
-{ return between<TYPE_FLOAT, TYPE_LONG_DOUBLE>(m_type); }
+bool json_element::is_int() const { return m_type >> 4 == CLASS_INT; }
+bool json_element::is_float() const { return m_type >> 4 == CLASS_FLOAT; }
 bool json_element::is_number() const
 { return between<TYPE_CHAR, TYPE_LONG_DOUBLE>(m_type); }
 bool json_element::is_string() const { return m_type == TYPE_JSON_STRING; }
@@ -327,21 +325,24 @@ json_float json_element::convert_to_float() const
 const char *json_element::convert_to_string() const 
 { return is_string() ? m_string.c_str() : nullptr; }
 const json_array &json_element::convert_to_array() const
-{ return json::array::null; }
+{ return is_array() ? m_array : json::array::null; }
 const json_object &json_element::convert_to_object() const
-{ return json::object::null; }
+{ return is_object() ? m_object : json::object::null; }
 
 // handle conversion to dynamic_string
 dynamic_string json_element::convert_to_dynamic_string() const
 { return is_string() ? m_string : dynamic_string(nullptr); }
 
-// implicit conversions
-json_element::operator bool() const 
-{ return convert_to_bool(); }
-
 // generic access
-const json_element &json_element::operator[](nullptr_t) const
-{ return json::null; }
+json_element &json_element::operator[](nullptr_t) {
+    if (!is_object()) 
+    { return const_cast<json_element &>(json::null); }
+    return m_object[nullptr];
+}
+const json_element &json_element::operator[](nullptr_t) const {
+    if (!is_object()) { return json::null; }
+    return m_object.at(nullptr);
+}
 
 namespace access_int {
     typedef json_element &(*fun_t)(json_element *, json_int);
@@ -387,6 +388,18 @@ json_element &json_element::access(const char *str) {
 const json_element &json_element::access(const char *str) const {
     if (!is_object()) { return json::null; }
     return m_object.at(str);
+}
+
+json_element &json_element::operator[](const json_element &je) {
+    if (je.is_int()) { return operator[](je.integer()); }
+    if (!is_object()) 
+    { return const_cast<json_element &>(json::null); }
+    return m_object[je];
+}
+const json_element &json_element::operator[](const json_element &je) const {
+    if (je.is_int()) { return operator[](je.integer()); }
+    if (!is_object()) { return json::null; }
+    return m_object.at(je);
 }
 
 // getters

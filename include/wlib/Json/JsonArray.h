@@ -2,6 +2,7 @@
 #define __WLIB_JSON_JSONARRAY_H__
 
 #include <wlib/array_list>
+#include <wlib/initializer_list>
 
 namespace wlp {
 
@@ -23,6 +24,12 @@ namespace wlp {
 
         json_array(const json_array &) = delete;
         json_array &operator=(const json_array &) = delete;
+
+        json_array(initializer_list<json_element> l);
+
+        template<typename ...args>
+        json_array(args &&...values) : array_list(sizeof...(args)) 
+        { swallow(prv_push_back(values)...); }
 
         template<typename val_t>
         iterator insert(size_type i, val_t &&val)
@@ -52,6 +59,12 @@ namespace wlp {
         const_iterator find(val_t &&val) const
         { return array_list::find(json_element(forward<val_t>(val))); }
 
+    private:
+        template<typename val_t>
+        bool prv_push_back(val_t &&val) {
+            push_back(forward<val_t>(val)); 
+            return true; 
+        }
     };
 
 }

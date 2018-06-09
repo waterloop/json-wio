@@ -233,34 +233,10 @@ namespace wlp {
         dynamic_string convert_to_dynamic_string() const;
 
     public:
-        // implicit conversion to pointer
-        template<typename ptr_t>
-        operator typename enable_type_if<
-            is_pointer<ptr_t>::value,
-            ptr_t>::type() const
-        { return nullptr; }
-        // implicit conversion to bool
-        operator bool() const;
-        // implicit conversion to int
-        template<typename int_t>
-        operator typename enable_type_if<
-            is_integral<int_t>::value &&
-            !is_same<bool, int_t>::value,
-            int_t>::type() const
-        { return static_cast<int_t>(convert_to_int()); }
-        // implicit conversion to float
-        template<typename float_t>
-        operator typename enable_type_if<
-            is_floating_point<float_t>::value,
-            float_t>::type() const
-        { return static_cast<float_t>(convert_to_float()); }
-        // implicit conversion to string
-        template<typename c_str_t>
-        operator typename enable_type_if<
-            is_same<char *, c_str_t>::value ||
-            is_same<const char *, c_str_t>::value,
-            c_str_t>::type() const
-        { return const_cast<c_str_t>(convert_to_string()); }
+        // implicit conversions
+        template<typename target_t>
+        operator target_t() const
+        { return as<target_t>(); }
 
     private:
         json_element &access(json_int i);
@@ -272,6 +248,7 @@ namespace wlp {
 
     public:
         // null access
+        json_element &operator[](nullptr_t);
         const json_element &operator[](nullptr_t) const;
 
         // bool and integral access
@@ -319,6 +296,10 @@ namespace wlp {
         { return access(static_cast<const char *>(str)); }
         json_element &operator[](const dynamic_string &str);
         const json_element &operator[](const dynamic_string &str) const;
+
+        // regular element access
+        json_element &operator[](const json_element &je);
+        const json_element &operator[](const json_element &je) const;
 
     public:
         const json_int &integer() const;
