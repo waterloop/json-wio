@@ -6,6 +6,7 @@
 #include <wlib/Json/JsonType.h>
 #include <wlib/Json/JsonUtil.h>
 
+#include <stdio.h>
 namespace wlp {
 
     class json_element;
@@ -19,7 +20,7 @@ namespace wlp {
 
         enum {
             JSON_OBJECT_DEFAULT_SIZE = 12,
-            JSON_OBJECT_DEFAULT_LOAD = 75
+            JSON_OBJECT_DEFAULT_LOAD = 80
         };
 
     public:
@@ -32,6 +33,10 @@ namespace wlp {
 
         json_object(const json_object &) = delete;
         json_object &operator=(const json_object &) = delete;
+
+        template<typename ...arg_t>
+        json_object(arg_t &&...args) : hash_map(sizeof...(arg_t) / 2) 
+        { prv_insert(forward<arg_t>(args)...); }
 
     public:
         template<typename key_t, typename val_t>
@@ -77,6 +82,15 @@ namespace wlp {
         template<typename key_t>
         json_element &operator[](key_t &&key)
         { return hash_map::operator[](json_element(forward<key_t>(key))); }
+
+    private:
+        template<typename ...arg_t>
+        void prv_insert() {}
+        template<typename key_t, typename val_t, typename ...arg_t>
+        void prv_insert(key_t &&key, val_t &&val, arg_t &&...args) {
+            insert(forward<key_t>(key), forward<val_t>(val));
+            prv_insert(forward<arg_t>(args)...);
+        }
     };
 
 }

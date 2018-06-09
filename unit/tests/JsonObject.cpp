@@ -404,3 +404,15 @@ TEST(json_object, implicit_access) {
     obj["nine"] = "hello";
     ASSERT_STREQ("hello", obj.find("nine")->as<const char *>());
 }
+
+TEST(json_object, list_initialize) {
+    json_object obj = {
+        "first", 1,
+        "second", 2,
+        "third", 3
+    };
+    ASSERT_EQ(3, obj.size());
+    ASSERT_EQ(1, obj["first"]);
+    ASSERT_EQ(2, obj["second"]);
+    ASSERT_EQ(3, obj["third"]);
+}

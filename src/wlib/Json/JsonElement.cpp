@@ -390,6 +390,16 @@ const json_element &json_element::access(const char *str) const {
     return m_object.at(str);
 }
 
+json_element &json_element::operator[](const dynamic_string &str) { 
+    if (!is_object())
+    { return const_cast<json_element &>(json::null); }
+    return m_object[str];
+}
+const json_element &json_element::operator[](const dynamic_string &str) const {
+    if (!is_object()) { return json::null; }
+    return m_object.at(str);
+}
+
 json_element &json_element::operator[](const json_element &je) {
     if (je.is_int()) { return operator[](je.integer()); }
     if (!is_object()) 
@@ -401,6 +411,31 @@ const json_element &json_element::operator[](const json_element &je) const {
     if (!is_object()) { return json::null; }
     return m_object.at(je);
 }
+
+// size query
+namespace size_query {
+    typedef size_type (*size_get_func_t)(const json_element *);
+
+    static size_type from_string(const json_element *je)
+    { return je->string().length(); }
+    static size_type from_array(const json_element *je)
+    { return je->array().size(); }
+    static size_type from_object(const json_element *je) 
+    { return je->object().size(); }
+    static size_get_func_t functions[3] = 
+    { from_string, from_array, from_object };
+
+    static size_type jump_true(const json_element *je) 
+    { return functions[(je->type() >> 4) - CLASS_STRING](je); }
+    static size_type jump_false(const json_element *je)
+    { return 0; }
+    static size_get_func_t jump[2] = 
+    { jump_false, jump_true };
+}
+size_type json_element::size() const 
+{ return size_query::jump[m_type >> 6](this); }
+size_type json_element::length() const
+{ return size(); }
 
 // getters
 const json_int &json_element::integer() const

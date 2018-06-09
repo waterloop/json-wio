@@ -875,8 +875,145 @@ TEST(json_element, null_access) {
 
     ASSERT_EQ(5, el[nullptr]);
     ASSERT_EQ(5, el[null_e]);
+    ASSERT_EQ(1, el.size());
+    ASSERT_EQ(1, el.length());
 }
 
 TEST(json_element, int_access) {
-    json_array arr = {1, 2.0, "hello"};
+    json_array arr = {"hello", 2.0, 1};
+    json_element el(move(arr));
+
+    ASSERT_EQ(3, el.size());
+    ASSERT_EQ(3, el.length());
+
+    json_element el_char(static_cast<char>(0));
+    json_element el_short(static_cast<short>(1));
+    json_element el_ulong(static_cast<unsigned long>(2));
+
+    ASSERT_EQ(1, el[el_char]);
+    ASSERT_EQ(1, el[0]);
+    ASSERT_EQ(2.0, el[el_short]);
+    ASSERT_EQ(2.0, el[1]);
+    ASSERT_EQ("hello", el[el_ulong]);
+    ASSERT_EQ("hello", el[2]);
+
+    el[1] = false;
+    ASSERT_EQ(false, el[1]);
+    el[1] = true;
+    ASSERT_EQ(true, el[1]);
+    el[1] = "makeup";
+    ASSERT_EQ("makeup", el[1]);
+}
+
+TEST(json_element, float_string_access) {
+    json_object obj;
+    constexpr float key1 = -25.66f;
+    constexpr double key2 = 564.3f;
+    constexpr auto key3 = "hello";
+    constexpr auto key4 = "nine";
+    constexpr auto val1 = "first";
+    constexpr auto val2 = "second";
+    constexpr auto val3 = "third";
+    constexpr auto val4 = "fourth";
+    obj[key1] = val1;
+    obj[key2] = val2;
+    obj[key3] = val3;
+    obj[key4] = val4;
+    ASSERT_EQ(4, obj.size());
+    json_element el(move(obj));
+    ASSERT_EQ(0, obj.size());
+    ASSERT_EQ(4, el.length());
+    ASSERT_EQ(val1, el[key1]);
+    ASSERT_EQ(val2, el[key2]);
+    ASSERT_EQ(val3, el[key3]);
+    ASSERT_EQ(val4, el[key4]);
+
+    el[key3] = 66666;
+    dynamic_string str(key3);
+    ASSERT_EQ(66666, el[str]);
+}
+
+TEST(json_element, nested_array_object) {
+    json_array arr1 = {5, 4, 3, 2, 1};
+    json_array arr2 = {"third", "second", "first"};
+    json_object obj1 = {
+        "numbers", move(arr1),
+        "letters", move(arr2),
+        "data", "mogball"
+    };
+    json_object obj2 = {
+        "elements", move(obj1),
+        "a", 'a',
+        "b", 'b',
+        "c", 'c'
+    };
+    json_element el(move(obj2));
+
+    ASSERT_TRUE(el.is_object());
+    ASSERT_EQ(4, el.size());
+    ASSERT_EQ('a', el["a"]);
+    ASSERT_EQ('b', el["b"]);
+    ASSERT_EQ('c', el["c"]);
+    
+    ASSERT_TRUE(el["elements"].is_object());
+    ASSERT_EQ(3, el["elements"].size());
+    ASSERT_EQ("mogball", el["elements"]["data"]);
+
+    ASSERT_TRUE(el["elements"]["letters"].is_array());
+    ASSERT_TRUE(el["elements"]["numbers"].is_array());
+    ASSERT_EQ(3, el["elements"]["letters"].size());
+    ASSERT_EQ(5, el["elements"]["numbers"].size());
+
+    ASSERT_EQ("first", el["elements"]["letters"][0]);
+    ASSERT_EQ("second", el["elements"]["letters"][1]);
+    ASSERT_EQ("third", el["elements"]["letters"][2]);
+    for (int i = 0; i < 5; ++i) {
+        ASSERT_EQ(i + 1, el["elements"]["numbers"][i]);
+    }
+}
+
+TEST(json_element, nested_object_array) {
+    json_object obj1 = {
+        "first_name", "Ontaro",
+        "last_name", "Gorriksson",
+        "age", 40,
+        "race", "dwarf"
+    };
+    json_object obj2 = {
+        "first_name", "Salmark",
+        "last_name", "McTaverish",
+        "age", 20,
+        "race", "human"
+    };
+    json_object obj3 = {
+        "first_name", "Emeritus",
+        "last_name", "Murtaugh",
+        "age", 60,
+        "race", "human"
+    };
+    json_array arr = {"list_end", move(obj3), move(obj2), move(obj1), "list_begin"};
+    json_element el(move(arr));
+    
+    ASSERT_TRUE(el.is_array());
+    ASSERT_EQ(5, el.size());
+    
+    ASSERT_TRUE(el[0].is_string());
+    ASSERT_EQ("list_begin", el[0]);
+    ASSERT_EQ(10, el[0].length());
+
+    ASSERT_TRUE(el[1].is_object());
+    ASSERT_EQ(4, el[1].size());
+    ASSERT_EQ("Ontaro", el[1]["first_name"]);
+    ASSERT_EQ("Gorriksson", el[1]["last_name"]);
+    ASSERT_EQ(40, el[1]["age"]);
+    ASSERT_EQ("dwarf", el[1]["race"]);
+
+    ASSERT_TRUE(el[3].is_object());
+    ASSERT_EQ(4, el[3].size());
+    ASSERT_EQ("Emeritus", el[3]["first_name"]);
+    ASSERT_EQ("Murtaugh", el[3]["last_name"]);
+    ASSERT_EQ(60, el[3]["age"]);
+    ASSERT_EQ("human", el[3]["race"]);
+
+    ASSERT_EQ("list_end", el[4]);
 }

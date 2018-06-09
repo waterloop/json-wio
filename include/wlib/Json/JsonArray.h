@@ -27,10 +27,11 @@ namespace wlp {
 
         json_array(initializer_list<json_element> l);
 
-        template<typename ...args>
-        json_array(args &&...values) : array_list(sizeof...(args)) 
-        { swallow(prv_push_back(forward<args>(values))...); }
+        template<typename ...arg_t>
+        json_array(arg_t &&...args) : array_list(sizeof...(arg_t)) 
+        { swallow(prv_push_back(forward<arg_t>(args))...); }
 
+    public:
         template<typename val_t>
         iterator insert(size_type i, val_t &&val)
         { return array_list::insert(i, json_element(forward<val_t>(val))); }
@@ -62,8 +63,9 @@ namespace wlp {
     private:
         template<typename val_t>
         bool prv_push_back(val_t &&val) {
-            push_back(forward<val_t>(val)); 
-            return true; 
+            // template pack initializes backwards...
+            push_back(forward<val_t>(val));
+            return true; // return value needed for swallow
         }
     };
 

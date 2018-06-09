@@ -301,6 +301,10 @@ namespace wlp {
         json_element &operator[](const json_element &je);
         const json_element &operator[](const json_element &je) const;
 
+        // size query for array and object types
+        size_type size() const;
+        size_type length() const;
+
     public:
         const json_int &integer() const;
         const json_float &floating() const;
