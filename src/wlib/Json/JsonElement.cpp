@@ -2,6 +2,7 @@
 #include <float.h>
 
 #include <wlib/Json/JsonElement.h>
+#include <wlib/Json/JsonNull.h>
 
 using namespace wlp;
 
@@ -31,6 +32,15 @@ json_element::json_element(const dynamic_string &str) :
 json_element::json_element(dynamic_string &&str) :
     m_string(move(str)),
     m_type(TYPE_JSON_STRING) {}
+
+// json array and json object
+json_element::json_element(json_array &&arr) :
+    m_array(move(arr)),
+    m_type(TYPE_JSON_ARRAY) {}
+
+json_element::json_element(json_object &&obj) :
+    m_object(move(obj)),
+    m_type(TYPE_JSON_OBJECT) {}
 
 // destruction jump tables
 namespace destroy {
@@ -69,10 +79,10 @@ namespace copy_assign {
     static void copy_string(json_element *dst, const json_element &src) {
         ::new(&dst->string()) dynamic_string(src.string());
     }
-    static void copy_array(json_element */*dst*/, const json_element &src) {
+    static void copy_array(json_element * /*dst*/, const json_element &src) {
         //::new(&dst->array()) json_array(src.array());
     }
-    static void copy_object(json_element */*dst*/, const json_element &src) {
+    static void copy_object(json_element * /*dst*/, const json_element &src) {
         //::new(&dst->object()) json_object(src.object());
     }
     static data_copier functions[json_type::NUM_CLASS] = {
@@ -174,6 +184,20 @@ json_element &json_element::operator=(dynamic_string &&str) {
     destroy::functions[m_type >> 4](this);
     m_string = move(str);
     m_type = TYPE_JSON_STRING;
+    return *this;
+}
+
+// json array and object
+json_element &json_element::operator=(json_array &&arr) {
+    destroy::functions[m_type >> 4](this);
+    m_array = move(arr);
+    m_type = TYPE_JSON_ARRAY;
+    return *this;
+}
+json_element &json_element::operator=(json_object &&obj) {
+    destroy::functions[m_type >> 4](this);
+    m_object = move(obj);
+    m_type = TYPE_JSON_OBJECT;
     return *this;
 }
 
@@ -302,10 +326,68 @@ json_float json_element::convert_to_float() const
 { return convert_float::converter[m_type >> 4](this); }
 const char *json_element::convert_to_string() const 
 { return is_string() ? m_string.c_str() : nullptr; }
+const json_array &json_element::convert_to_array() const
+{ return json::array::null; }
+const json_object &json_element::convert_to_object() const
+{ return json::object::null; }
 
 // handle conversion to dynamic_string
 dynamic_string json_element::convert_to_dynamic_string() const
 { return is_string() ? m_string : dynamic_string(nullptr); }
+
+// implicit conversions
+json_element::operator bool() const 
+{ return convert_to_bool(); }
+
+// generic access
+const json_element &json_element::operator[](nullptr_t) const
+{ return json::null; }
+
+namespace access_int {
+    typedef json_element &(*fun_t)(json_element *, json_int);
+    typedef const json_element &(*const_t)(const json_element *, json_int);
+    static json_element &access_array(json_element *je, json_int i)
+    { return je->array()[i]; }
+    static const json_element &const_array(const json_element *je, json_int i)
+    { return je->array()[i]; }
+    static json_element &access_object(json_element *je, json_int i)
+    { return je->object()[i]; }
+    static const json_element &const_object(const json_element *je, json_int i) 
+    { return je->object().at(i); }
+    static fun_t functions[2] = 
+    { access_array, access_object };
+    static const_t const_functions[2] =
+    { const_array, const_object };
+}
+json_element &json_element::access(json_int i) {
+    if (m_type < TYPE_JSON_ARRAY) 
+    { return const_cast<json_element &>(json::null); }
+    return access_int::functions[m_type - TYPE_JSON_ARRAY](this, i);
+}
+const json_element &json_element::access(json_int i) const {
+    if (m_type < TYPE_JSON_ARRAY) { return json::null; }
+    return access_int::const_functions[m_type - TYPE_JSON_ARRAY](this, i);
+}
+
+json_element &json_element::access(json_float f) {
+    if (!is_object()) 
+    { return const_cast<json_element &>(json::null); }
+    return m_object[f];
+}
+const json_element &json_element::access(json_float f) const {
+    if (!is_object()) { return json::null; }
+    return m_object.at(f);
+}
+
+json_element &json_element::access(const char *str) {
+    if (!is_object())
+    { return const_cast<json_element &>(json::null); }
+    return m_object[str];
+}
+const json_element &json_element::access(const char *str) const {
+    if (!is_object()) { return json::null; }
+    return m_object.at(str);
+}
 
 // getters
 const json_int &json_element::integer() const

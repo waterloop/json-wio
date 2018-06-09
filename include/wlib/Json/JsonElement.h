@@ -48,6 +48,10 @@ namespace wlp {
         json_element(const static_string<string_size> &str) :
             json_element(static_cast<const char*>(str.c_str()), str.length()) {}
 
+        // json array and json object
+        json_element(json_array &&arr);
+        json_element(json_object &&arr);
+
         // copy constructor and operator
         json_element(const json_element &je);
         json_element &operator=(const json_element &je);
@@ -92,6 +96,10 @@ namespace wlp {
         json_element &operator=(const static_string<string_size> &str)
         { return assign(str.c_str(), str.length()); }
 
+        // json array and json object
+        json_element &operator=(json_array &&arr);
+        json_element &operator=(json_object &&arr);
+
         // type checks
         bool is_null() const;
         bool is_bool() const;
@@ -103,21 +111,21 @@ namespace wlp {
         bool is_object() const;
 
         // string content checks
-        bool is_string_null() const ;
-        bool is_string_true() const ;
-        bool is_string_false() const ;
-        bool is_string_bool() const ;
-        bool is_string_int() const ;
-        bool is_string_float() const ;
-        bool is_string_array() const ;
-        bool is_string_object() const ;
+        bool is_string_null() const;
+        bool is_string_true() const;
+        bool is_string_false() const;
+        bool is_string_bool() const;
+        bool is_string_int() const;
+        bool is_string_float() const;
+        bool is_string_array() const;
+        bool is_string_object() const;
 
         // type conversion
-        bool convertible_to_null() const ;
-        bool convertible_to_bool() const ;
-        bool convertible_to_int() const ;
-        bool convertible_to_float() const ;
-        bool convertible_to_string() const ;
+        bool convertible_to_null() const;
+        bool convertible_to_bool() const;
+        bool convertible_to_int() const;
+        bool convertible_to_float() const;
+        bool convertible_to_string() const;
 
         // convertible to null
         template<typename target_t>
@@ -144,12 +152,19 @@ namespace wlp {
             is_floating_point<target_t>::value,
             bool>::type convertible_to() const
         { return convertible_to_float(); }
-        template<typename target_t>
         // convertible to string
+        template<typename target_t>
         typename enable_type_if<
             is_string_type<target_t>(),
             bool>::type convertible_to() const
         { return convertible_to_string(); }
+        // convertible to array or object
+        template<typename target_t>
+        typename enable_type_if<
+            is_same<json_array, target_t>::value ||
+            is_same<json_object, target_t>::value,
+            bool>::type convertible_to() const
+        { return false; }
 
     public:
         // convert to null
@@ -184,6 +199,18 @@ namespace wlp {
             is_same<char *, target_t>::value,
             target_t>::type as() const
         { return const_cast<target_t>(convert_to_string()); }
+        // convert to json array
+        template<typename target_t>
+        typename enable_type_if<
+            is_same<json_array, target_t>::value,
+            const json_array &>::type as() const
+        { return convert_to_array(); }
+        // convert to json object
+        template<typename target_t>
+        typename enable_type_if<
+            is_same<json_object, target_t>::value,
+            const json_object &>::type as() const
+        { return convert_to_object(); }
 
     public:
         // convert to dynamic string
@@ -199,18 +226,99 @@ namespace wlp {
         json_int convert_to_int() const;
         json_float convert_to_float() const;
         const char *convert_to_string() const;
+        const json_array &convert_to_array() const;
+        const json_object &convert_to_object() const;
 
     private:
         dynamic_string convert_to_dynamic_string() const;
 
+    public:
+        // implicit conversion to pointer
+        template<typename ptr_t>
+        operator typename enable_type_if<
+            is_pointer<ptr_t>::value,
+            ptr_t>::type() const
+        { return nullptr; }
+        // implicit conversion to bool
+        operator bool() const;
+        // implicit conversion to int
+        template<typename int_t>
+        operator typename enable_type_if<
+            is_integral<int_t>::value &&
+            !is_same<bool, int_t>::value,
+            int_t>::type() const
+        { return static_cast<int_t>(convert_to_int()); }
+        // implicit conversion to float
+        template<typename float_t>
+        operator typename enable_type_if<
+            is_floating_point<float_t>::value,
+            float_t>::type() const
+        { return static_cast<float_t>(convert_to_float()); }
+        // implicit conversion to string
+        template<typename c_str_t>
+        operator typename enable_type_if<
+            is_same<char *, c_str_t>::value ||
+            is_same<const char *, c_str_t>::value,
+            c_str_t>::type() const
+        { return const_cast<c_str_t>(convert_to_string()); }
+
     private:
-        void assign_null();
-        void assign_bool(bool b);
-        void assign_int(json_int i);
-        void assign_float(json_float f);
-        void assign_str(const char *str, size_type len);
-        void assign_array(json_array &&arr);
-        void assign_object(json_array &&obj);
+        json_element &access(json_int i);
+        const json_element &access(json_int i) const;
+        json_element &access(json_float f);
+        const json_element &access(json_float f) const;
+        json_element &access(const char *str);
+        const json_element &access(const char *str) const;
+
+    public:
+        // null access
+        const json_element &operator[](nullptr_t) const;
+
+        // bool and integral access
+        template<typename int_t>
+        typename enable_type_if<
+            is_integral<int_t>::value,
+            json_element &>::type
+        operator[](int_t i)
+        { return access(static_cast<json_int>(i)); }
+        template<typename int_t>
+        typename enable_type_if<
+            is_integral<int_t>::value,
+            const json_element &>::type
+        operator[](int_t i) const
+        { return access(static_cast<json_int>(i)); }
+
+        // float access
+        template<typename float_t>
+        typename enable_type_if<
+            is_floating_point<float_t>::value,
+            json_element &>::type
+        operator[](float_t f)
+        { return access(static_cast<json_float>(f)); }
+        template<typename float_t>
+        typename enable_type_if<
+            is_floating_point<float_t>::value,
+            const json_element &>::type
+        operator[](float_t f) const
+        { return access(static_cast<json_float>(f)); }
+
+        // string access
+        template<typename c_str_t>
+        typename enable_type_if<
+            is_same<char *, c_str_t>::value ||
+            is_same<const char *, c_str_t>::value,
+            json_element &>::type
+        operator[](c_str_t *str) 
+        { return access(static_cast<const char *>(str)); }
+        template<typename c_str_t>
+        typename enable_type_if<
+            is_same<char *, c_str_t>::value ||
+            is_same<const char *, c_str_t>::value,
+            const json_element &>::type
+        operator[](c_str_t *str) const
+        { return access(static_cast<const char *>(str)); }
+        json_element &operator[](const dynamic_string &str);
+        const json_element &operator[](const dynamic_string &str) const;
 
     public:
         const json_int &integer() const;
@@ -219,13 +327,13 @@ namespace wlp {
         const json_array &array() const;
         const json_object &object() const;
 
-    public:
         json_int &integer();
         json_float &floating();
         dynamic_string &string();
         json_array &array();
         json_object &object();
 
+    public:
         template<typename access_t>
         typename enable_type_if<
             is_same<nullptr_t, access_t>::value,
@@ -269,18 +377,18 @@ namespace wlp {
         json_type m_type;
     };
 
-    template<typename cmp_t, 
+    template<typename cmp_t,
         typename access_t = typename remove_cv<
         typename remove_reference<cmp_t>::type>::type,
         json_type type = type_info<cmp_t>::value>
-    bool operator==(const json_element &je, const cmp_t &v) 
+    bool operator==(const json_element &je, const cmp_t &v)
     { return je.type() >> 4 == type >> 4 && v == je.ref_access<access_t>(); }
 
     template<typename cmp_t,
         typename access_t = typename remove_cv<
         typename remove_reference<cmp_t>::type>::type,
         json_type type = type_info<cmp_t>::value>
-    bool operator< (const json_element &je, const cmp_t &v) { 
+    bool operator< (const json_element &je, const cmp_t &v) {
         json_type_t cls1 = je.type() >> 4;
         json_type_t cls2 = type >> 4;
         return cls1 < cls2 || (cls1 == cls2 &&
@@ -290,7 +398,7 @@ namespace wlp {
         typename access_t = typename remove_cv<
         typename remove_reference<cmp_t>::type>::type,
         json_type type = type_info<cmp_t>::value>
-    bool operator< (const cmp_t &v, const json_element &je) { 
+    bool operator< (const cmp_t &v, const json_element &je) {
         json_type_t cls1 = je.type() >> 4;
         json_type_t cls2 = type >> 4;
         return cls2 < cls1 || (cls2 == cls1 &&
@@ -298,7 +406,7 @@ namespace wlp {
     }
 
     template<typename cmp_t>
-    bool operator!=(const json_element &je, const cmp_t &v) 
+    bool operator!=(const json_element &je, const cmp_t &v)
     { return !operator==<cmp_t>(je, v); }
     template<typename cmp_t>
     bool operator> (const json_element &je, const cmp_t &v)
@@ -310,7 +418,7 @@ namespace wlp {
     bool operator>=(const json_element &je, const cmp_t &v)
     { return !operator< <cmp_t>(je, v); }
     template<typename cmp_t>
-    bool operator==(const cmp_t &v, const json_element &je) 
+    bool operator==(const cmp_t &v, const json_element &je)
     { return operator==<cmp_t>(je, v); }
     template<typename cmp_t>
     bool operator!=(const cmp_t &v, const json_element &je)
@@ -319,12 +427,12 @@ namespace wlp {
     bool operator> (const cmp_t &v, const json_element &je)
     { return operator< <cmp_t>(je, v); }
     template<typename cmp_t>
-    bool operator<=(const cmp_t &v, const json_element &je) 
+    bool operator<=(const cmp_t &v, const json_element &je)
     { return !operator< <cmp_t>(je, v); }
     template<typename cmp_t>
-    bool operator>=(const cmp_t &v, const json_element &je) 
+    bool operator>=(const cmp_t &v, const json_element &je)
     { return !operator< <cmp_t>(v, je); }
-    
+
 }
 
 #endif
