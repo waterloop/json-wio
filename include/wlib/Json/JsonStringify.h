@@ -8,6 +8,7 @@ namespace wlp {
     class json_element;
 
     namespace json {
+        extern int buff_size(const json_element &je);
         extern int stringify(char *buf, const json_element &je);
         extern dynamic_string stringify(const json_element &je); 
     }

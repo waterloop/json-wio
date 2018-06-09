@@ -1,7 +1,7 @@
 #ifndef __WLIB_JSON_JSONARRAY_H__
 #define __WLIB_JSON_JSONARRAY_H__
 
-#include <wlib/linked_list>
+#include <wlib/array_list>
 #include <wlib/initializer_list>
 
 namespace wlp {
@@ -9,7 +9,7 @@ namespace wlp {
     class json_element;
 
     template<typename val_t>
-    using array_t = linked_list<val_t>;
+    using array_t = array_list<val_t>;
 
     class json_array :
         public array_t<json_element> {
@@ -32,7 +32,7 @@ namespace wlp {
         json_array(initializer_list<json_element> l);
 
         template<typename ...arg_t>
-        json_array(arg_t &&...args) : parent_t(/*sizeof...(arg_t)*/) 
+        json_array(arg_t &&...args) : parent_t(sizeof...(arg_t))
         { swallow(prv_push_back(forward<arg_t>(args))...); }
 
     public:
