@@ -32,7 +32,7 @@ targets:
 
 dependencies:
   wlib-wio:
-    version: latest
+    version: 2.1.1
     vendor: false
     compile_flags:
     - -DMAX_ALLOCATORS=10u

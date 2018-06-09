@@ -185,3 +185,53 @@ TEST(json_array, string_elements) {
     ASSERT_EQ(arr[2], e3);
 }
 
+TEST(json_array, implicit_operations) {
+    json_array arr;
+    arr.push_back("second");
+    arr.push_back("third");
+    arr.push_front("first");
+
+    ASSERT_EQ("first", arr[0]);
+    ASSERT_EQ("second", arr[1]);
+    ASSERT_EQ("third", arr[2]);
+
+    ASSERT_EQ(3, arr.size());
+
+    auto it = arr.insert(1, "middle");
+    ASSERT_EQ("middle", arr[1]);
+    ASSERT_EQ("second", arr[2]);
+
+    ++it;
+    arr.insert(it, "movesecond");
+
+    ASSERT_EQ(5, arr.size());
+    ASSERT_EQ("movesecond", arr[2]);
+    ASSERT_EQ("second", arr[3]);
+
+    auto ret = arr.find("mot");
+    ASSERT_EQ(arr.end(), ret);
+
+    ret = arr.find("second");
+    ASSERT_NE(arr.end(), ret);
+    ASSERT_EQ("second", *ret);
+
+    ASSERT_EQ(3, arr.index_of("second"));
+}
+
+TEST(json_array, brace_initializer) {
+    json_array arr = {1, 5, 0.5, true, false, nullptr, "first", -0.4f};
+    ASSERT_EQ(8, arr.size());
+    ASSERT_EQ(8, arr.capacity());
+    ASSERT_EQ(-0.4f, arr[0]);
+    ASSERT_EQ("first", arr[1]);
+    ASSERT_EQ(nullptr, arr[2]);
+    ASSERT_EQ(false, arr[3]);
+    ASSERT_EQ(true, arr[4]);
+    ASSERT_EQ(0.5, arr[5]);
+    ASSERT_EQ(5, arr[6]);
+    ASSERT_EQ(1, arr[7]);
+
+    ASSERT_EQ(TYPE_NULL, arr[2].type());
+    ASSERT_EQ(TYPE_BOOL, arr[3].type());
+    ASSERT_EQ(TYPE_BOOL, arr[4].type());
+}

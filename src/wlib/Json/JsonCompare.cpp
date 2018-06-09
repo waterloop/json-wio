@@ -24,8 +24,8 @@ namespace element_equals {
     };
     static bool compare(const json_element &je1, const json_element &je2) {
         json_type_t cls = je1.type() >> 4;
-        if (cls != je2.type() >> 4) { return false; }
-        return element_equals::comparators[cls](je1, je2);
+        return cls == je2.type() >> 4 &&
+            element_equals::comparators[cls](je1, je2);
     }
 }
 
@@ -56,8 +56,8 @@ namespace element_less {
     static bool compare(const json_element &je1, const json_element &je2) {
         json_type_t cls1 = je1.type() >> 4;
         json_type_t cls2 = je2.type() >> 4;
-        if (cls1 != cls2) { return cls1 < cls2; }
-        return element_less::comparators[cls1](je1, je2);
+        return cls1 < cls2 || (cls1 == cls2 &&
+            element_less::comparators[cls1](je1, je2));
     }
 }
 
@@ -69,4 +69,3 @@ bool json_element::operator<=(const json_element &je) const
 { return !element_less::compare(je, *this); }
 bool json_element::operator>=(const json_element &je) const 
 { return !element_less::compare(*this, je); }
-

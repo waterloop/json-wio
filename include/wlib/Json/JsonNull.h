@@ -6,6 +6,12 @@
 namespace wlp {
     namespace json {
         extern const json_element null;
+        namespace array {
+            extern const json_array null;
+        }
+        namespace object {
+            extern const json_object null;
+        }
     }
 }
 

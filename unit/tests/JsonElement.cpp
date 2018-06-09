@@ -595,3 +595,425 @@ TEST(json_element, operators) {
     ASSERT_STREQ(str3, var.as<const char *>());
     ASSERT_EQ(dstr, var.as<dynamic_string>());
 }
+
+TEST(json_element, implicit_equals) {
+    json_element element_null;
+    json_element element_bool(true);
+    json_element element_int(-50);
+    json_element element_float(60.70);
+    json_element element_string("hello");
+
+    ASSERT_TRUE(element_null == nullptr);
+    ASSERT_FALSE(element_null == true);
+    ASSERT_FALSE(element_null == 10);
+    ASSERT_FALSE(element_null == 50.56);
+    ASSERT_FALSE(element_null == "hello");
+
+    ASSERT_FALSE(element_bool == nullptr);
+    ASSERT_FALSE(element_bool == false);
+    ASSERT_TRUE(element_bool == true);
+    ASSERT_FALSE(element_bool == 24);
+    ASSERT_FALSE(element_bool == 60.67);
+    ASSERT_FALSE(element_bool == "55677");
+
+    ASSERT_FALSE(element_int == nullptr);
+    ASSERT_FALSE(element_int == true);
+    ASSERT_FALSE(element_int == 10);
+    ASSERT_TRUE(element_int == -50);
+    ASSERT_FALSE(element_int == 44.44);
+    ASSERT_FALSE(element_int == "hello");
+
+    ASSERT_FALSE(element_float == nullptr);
+    ASSERT_FALSE(element_float == true);
+    ASSERT_FALSE(element_float == 60);
+    ASSERT_FALSE(element_float == -555.555);
+    ASSERT_TRUE(element_float == 60.70);
+    ASSERT_FALSE(element_float == "hello");
+
+    ASSERT_FALSE(element_string == nullptr);
+    ASSERT_FALSE(element_string == true);
+    ASSERT_FALSE(element_string == 10);
+    ASSERT_FALSE(element_string == 10.555);
+    ASSERT_FALSE(element_string == "noway");
+    ASSERT_TRUE(element_string == "hello");
+
+    ASSERT_TRUE(element_int == static_cast<short>(-50));
+    ASSERT_TRUE(element_int == static_cast<long>(-50));
+
+    json_element zero_float(0.0f);
+    ASSERT_TRUE(zero_float == 0.0);
+    ASSERT_TRUE(zero_float == 0.0f);
+
+    dynamic_string hello("hello");
+    ASSERT_TRUE(element_string == hello);
+
+    ASSERT_TRUE(zero_float != 10.0);
+}
+
+TEST(json_element, implicit_less) {
+    ASSERT_FALSE(null_e < nullptr);
+    ASSERT_FALSE(bool_e < false);
+    ASSERT_FALSE(bool_e < true);
+    ASSERT_TRUE(false_e < true);
+    ASSERT_TRUE(null_e < 10);
+    ASSERT_TRUE(bool_e < 10);
+    json_element e_int(50);
+    ASSERT_FALSE(e_int < nullptr);
+    ASSERT_FALSE(e_int < true);
+    ASSERT_TRUE(e_int < 70);
+    ASSERT_FALSE(e_int < 20);
+    ASSERT_TRUE(e_int < 66.666);
+    json_element e_float(45.56f);
+    ASSERT_FALSE(e_float < nullptr);
+    ASSERT_FALSE(e_float < true);
+    ASSERT_FALSE(e_float < 10000);
+    ASSERT_FALSE(e_float < 20.0);
+    ASSERT_TRUE(e_float < 100.0f);
+    ASSERT_TRUE(e_float < 1000.0);
+    ASSERT_TRUE(e_float < "hello");
+    json_element str("hohohoho");
+    ASSERT_TRUE(str < "zzozozo");
+    ASSERT_FALSE(str < "aasdfasd");
+    ASSERT_FALSE(str < 35.3553);
+}
+
+TEST(json_element, implicit_comparisons) {
+    json_element e1(4);
+    json_element e2(55.55);
+    json_element e3("hello");
+
+    ASSERT_TRUE(e1 == 4);
+    ASSERT_TRUE(4 == e1);
+    ASSERT_FALSE(e1 == 3);
+    ASSERT_FALSE(3 == e1);
+
+    ASSERT_TRUE(e2 == 55.55);
+    ASSERT_TRUE(55.55 == e2);
+    ASSERT_FALSE(e2 == 44.44);
+    ASSERT_FALSE(44.44 == e2);
+
+    ASSERT_TRUE(e3 == "hello");
+    ASSERT_TRUE("hello" == e3);
+    ASSERT_FALSE(e3 == "womba");
+    ASSERT_FALSE("womba" == e3);
+
+    ASSERT_TRUE(e1 != 3);
+    ASSERT_TRUE(3 != e1);
+    ASSERT_FALSE(e1 != 4);
+    ASSERT_FALSE(4 != e1);
+
+    ASSERT_TRUE(e2 != 2.22);
+    ASSERT_TRUE(2.22 != e2);
+    ASSERT_FALSE(e2 != 55.55);
+    ASSERT_FALSE(e2 != 55.55);
+
+    ASSERT_TRUE(e3 != "womba");
+    ASSERT_TRUE("womba" != e3);
+    ASSERT_FALSE(e3 != "hello");
+    ASSERT_FALSE("hello" != e3);
+
+    ASSERT_TRUE(e1 < 5);
+    ASSERT_TRUE(2 < e1);
+    ASSERT_FALSE(e1 < 1);
+    ASSERT_FALSE(10 < e1);
+
+    ASSERT_TRUE(e2 < 66.66);
+    ASSERT_TRUE(33.33 < e2);
+    ASSERT_FALSE(e2 < -55.55);
+    ASSERT_FALSE(77.77 < e2);
+
+    ASSERT_TRUE(e3 < "zoppa");
+    ASSERT_TRUE("ahaha" < e3);
+    ASSERT_FALSE(e3 < "apppa");
+    ASSERT_FALSE("zoppa" < e3);
+
+    ASSERT_TRUE(e1 > 1);
+    ASSERT_TRUE(10 > e1);
+    ASSERT_FALSE(e1 > 1000);
+    ASSERT_FALSE(-40 > e1);
+
+    ASSERT_TRUE(e2 > -50.0);
+    ASSERT_TRUE(500.00 > e2);
+    ASSERT_FALSE(e2 > 5000.0);
+    ASSERT_FALSE(-20.0 > e2);
+
+    ASSERT_TRUE(e3 > "apple");
+    ASSERT_TRUE("zebra" > e3);
+    ASSERT_FALSE(e3 > "zebra");
+    ASSERT_FALSE("apple" > e3);
+    
+    ASSERT_TRUE(e1 <= 5);
+    ASSERT_TRUE(2 <= e1);
+    ASSERT_FALSE(e1 <= 1);
+    ASSERT_FALSE(10 <= e1);
+
+    ASSERT_TRUE(e2 <= 66.66);
+    ASSERT_TRUE(33.33 <= e2);
+    ASSERT_FALSE(e2 <= -55.55);
+    ASSERT_FALSE(77.77 <= e2);
+
+    ASSERT_TRUE(e3 <= "zoppa");
+    ASSERT_TRUE("ahaha" <= e3);
+    ASSERT_FALSE(e3 <= "apppa");
+    ASSERT_FALSE("zoppa" <= e3);
+
+    ASSERT_TRUE(e1 >= 1);
+    ASSERT_TRUE(10 >= e1);
+    ASSERT_FALSE(e1 >= 1000);
+    ASSERT_FALSE(-40 >= e1);
+
+    ASSERT_TRUE(e2 >= -50.0);
+    ASSERT_TRUE(500.00 >= e2);
+    ASSERT_FALSE(e2 >= 5000.0);
+    ASSERT_FALSE(-20.0 >= e2);
+
+    ASSERT_TRUE(e3 >= "apple");
+    ASSERT_TRUE("zebra" >= e3);
+    ASSERT_FALSE(e3 >= "zebra");
+    ASSERT_FALSE("apple" >= e3);
+}
+
+TEST(json_element, convertible_to_array_object) {
+    json_element element(10);
+    ASSERT_FALSE(element.convertible_to<json_array>());
+    ASSERT_FALSE(element.convertible_to<json_object>());
+}
+
+TEST(json_element, convert_to_array) {
+    json_element not_arr("hello");
+    ASSERT_EQ(0, not_arr.as<json_array>().size());
+    json_array array;
+    array.push_back(1);
+    array.push_back("hello");
+    array.push_back(24.4);
+    json_element is_arr(move(array));
+    ASSERT_EQ(3, is_arr.as<json_array>().size());
+    ASSERT_EQ(0, array.size());
+}
+
+TEST(json_element, convert_to_object) {
+    json_element not_obj("hello");
+    ASSERT_EQ(0, not_obj.as<json_object>().size());
+    json_object obj;
+    obj["first"] = 1;
+    obj["second"] = 2;
+    obj["third"] = 3;
+    json_element is_obj(move(obj));
+    ASSERT_EQ(3, is_obj.as<json_object>().size());
+    ASSERT_EQ(0, obj.size());
+}
+
+TEST(json_element, implicit_bool) {
+    bool res1 = null_e;
+    ASSERT_FALSE(res1);
+    bool res2 = false_e;
+    ASSERT_FALSE(res2);
+    bool res3 = bool_e;
+    ASSERT_TRUE(res3);
+
+    json_element integer(50);
+    bool res4 = integer;
+    ASSERT_TRUE(res4);
+    json_element zero(0);
+    bool res5 = zero;
+    ASSERT_FALSE(res5);
+
+    json_array arr1;
+    json_element arr_e(move(arr1));
+    bool res6 = arr_e;
+    ASSERT_FALSE(res6);
+
+    json_array arr2;
+    arr2.push_back(2);
+    arr_e = move(arr2);
+    bool res7 = arr_e;
+    ASSERT_TRUE(res7);
+    
+    if (integer) {}
+    else { FAIL(); }
+
+    if (!integer) { FAIL(); }
+    else {}
+}
+
+TEST(json_element, implicit_int) {
+    json_element ival1(40);
+    int val1 = ival1;
+
+    ASSERT_EQ(40, ival1);
+    ASSERT_EQ(40, val1);
+
+    json_element ival2(-500);
+    long long val2 = ival2;
+    ASSERT_EQ(-500, val2);
+}
+
+TEST(json_element, implicit_float) {
+    json_element fval1(60.605f);
+    float val1 = fval1;
+    ASSERT_FLOAT_EQ(60.605f, val1);
+    
+    json_element fval2(-40.404);
+    double val2 = fval2;
+    ASSERT_DOUBLE_EQ(-40.404, val2);
+}
+
+TEST(json_element, implicit_string) {
+    json_element strval1("hello");
+    const char *val1 = strval1;
+    ASSERT_STREQ("hello", val1);
+
+    json_element strval2("the end is nigh!");
+    char *val2 = strval2;
+    ASSERT_STREQ("the end is nigh!", val2);
+}
+
+TEST(json_element, null_access) {
+    json_object obj;
+    obj[nullptr] = 5;
+    json_element el(move(obj));
+
+    ASSERT_EQ(5, el[nullptr]);
+    ASSERT_EQ(5, el[null_e]);
+    ASSERT_EQ(1, el.size());
+    ASSERT_EQ(1, el.length());
+}
+
+TEST(json_element, int_access) {
+    json_array arr = {"hello", 2.0, 1};
+    json_element el(move(arr));
+
+    ASSERT_EQ(3, el.size());
+    ASSERT_EQ(3, el.length());
+
+    json_element el_char(static_cast<char>(0));
+    json_element el_short(static_cast<short>(1));
+    json_element el_ulong(static_cast<unsigned long>(2));
+
+    ASSERT_EQ(1, el[el_char]);
+    ASSERT_EQ(1, el[0]);
+    ASSERT_EQ(2.0, el[el_short]);
+    ASSERT_EQ(2.0, el[1]);
+    ASSERT_EQ("hello", el[el_ulong]);
+    ASSERT_EQ("hello", el[2]);
+
+    el[1] = false;
+    ASSERT_EQ(false, el[1]);
+    el[1] = true;
+    ASSERT_EQ(true, el[1]);
+    el[1] = "makeup";
+    ASSERT_EQ("makeup", el[1]);
+}
+
+TEST(json_element, float_string_access) {
+    json_object obj;
+    constexpr float key1 = -25.66f;
+    constexpr double key2 = 564.3f;
+    constexpr auto key3 = "hello";
+    constexpr auto key4 = "nine";
+    constexpr auto val1 = "first";
+    constexpr auto val2 = "second";
+    constexpr auto val3 = "third";
+    constexpr auto val4 = "fourth";
+    obj[key1] = val1;
+    obj[key2] = val2;
+    obj[key3] = val3;
+    obj[key4] = val4;
+    ASSERT_EQ(4, obj.size());
+    json_element el(move(obj));
+    ASSERT_EQ(0, obj.size());
+    ASSERT_EQ(4, el.length());
+    ASSERT_EQ(val1, el[key1]);
+    ASSERT_EQ(val2, el[key2]);
+    ASSERT_EQ(val3, el[key3]);
+    ASSERT_EQ(val4, el[key4]);
+
+    el[key3] = 66666;
+    dynamic_string str(key3);
+    ASSERT_EQ(66666, el[str]);
+}
+
+TEST(json_element, nested_array_object) {
+    json_array arr1 = {5, 4, 3, 2, 1};
+    json_array arr2 = {"third", "second", "first"};
+    json_object obj1 = {
+        "numbers", move(arr1),
+        "letters", move(arr2),
+        "data", "mogball"
+    };
+    json_object obj2 = {
+        "elements", move(obj1),
+        "a", 'a',
+        "b", 'b',
+        "c", 'c'
+    };
+    json_element el(move(obj2));
+
+    ASSERT_TRUE(el.is_object());
+    ASSERT_EQ(4, el.size());
+    ASSERT_EQ('a', el["a"]);
+    ASSERT_EQ('b', el["b"]);
+    ASSERT_EQ('c', el["c"]);
+    
+    ASSERT_TRUE(el["elements"].is_object());
+    ASSERT_EQ(3, el["elements"].size());
+    ASSERT_EQ("mogball", el["elements"]["data"]);
+
+    ASSERT_TRUE(el["elements"]["letters"].is_array());
+    ASSERT_TRUE(el["elements"]["numbers"].is_array());
+    ASSERT_EQ(3, el["elements"]["letters"].size());
+    ASSERT_EQ(5, el["elements"]["numbers"].size());
+
+    ASSERT_EQ("first", el["elements"]["letters"][0]);
+    ASSERT_EQ("second", el["elements"]["letters"][1]);
+    ASSERT_EQ("third", el["elements"]["letters"][2]);
+    for (int i = 0; i < 5; ++i) {
+        ASSERT_EQ(i + 1, el["elements"]["numbers"][i]);
+    }
+}
+
+TEST(json_element, nested_object_array) {
+    json_object obj1 = {
+        "first_name", "Ontaro",
+        "last_name", "Gorriksson",
+        "age", 40,
+        "race", "dwarf"
+    };
+    json_object obj2 = {
+        "first_name", "Salmark",
+        "last_name", "McTaverish",
+        "age", 20,
+        "race", "human"
+    };
+    json_object obj3 = {
+        "first_name", "Emeritus",
+        "last_name", "Murtaugh",
+        "age", 60,
+        "race", "human"
+    };
+    json_array arr = {"list_end", move(obj3), move(obj2), move(obj1), "list_begin"};
+    json_element el(move(arr));
+    
+    ASSERT_TRUE(el.is_array());
+    ASSERT_EQ(5, el.size());
+    
+    ASSERT_TRUE(el[0].is_string());
+    ASSERT_EQ("list_begin", el[0]);
+    ASSERT_EQ(10, el[0].length());
+
+    ASSERT_TRUE(el[1].is_object());
+    ASSERT_EQ(4, el[1].size());
+    ASSERT_EQ("Ontaro", el[1]["first_name"]);
+    ASSERT_EQ("Gorriksson", el[1]["last_name"]);
+    ASSERT_EQ(40, el[1]["age"]);
+    ASSERT_EQ("dwarf", el[1]["race"]);
+
+    ASSERT_TRUE(el[3].is_object());
+    ASSERT_EQ(4, el[3].size());
+    ASSERT_EQ("Emeritus", el[3]["first_name"]);
+    ASSERT_EQ("Murtaugh", el[3]["last_name"]);
+    ASSERT_EQ(60, el[3]["age"]);
+    ASSERT_EQ("human", el[3]["race"]);
+
+    ASSERT_EQ("list_end", el[4]);
+}

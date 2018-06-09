@@ -26,6 +26,16 @@ namespace wlp {
 
     typedef unsigned char json_type_t;
 
+    enum json_class : json_type_t {
+        CLASS_NULL = 0x0,
+        CLASS_BOOL = 0x1,
+        CLASS_INT = 0x2,
+        CLASS_FLOAT = 0x3,
+        CLASS_STRING = 0x4,
+        CLASS_ARRAY = 0x5,
+        CLASS_OBJECT = 0x6
+    };
+
     enum json_type : json_type_t {
         TYPE_NULL = 0x00,
 
@@ -85,8 +95,13 @@ namespace wlp {
     TYPE_DECL(TYPE_JSON_ARRAY, short *)
     TYPE_DECL(TYPE_JSON_OBJECT, int *)
 
+    TYPE_INFO(TYPE_JSON_STRING, char[])
     TYPE_INFO(TYPE_JSON_STRING, char *)
     TYPE_INFO(TYPE_JSON_STRING, dynamic_string)
+
+    template<size_type size>
+    struct type_info<char[size]>
+    { static constexpr json_type value = TYPE_JSON_STRING; };
 
     template<bool cond, typename target_t = void>
     struct enable_type_if {};
@@ -96,8 +111,16 @@ namespace wlp {
     };
 
     template<typename target_t>
+    constexpr bool is_char_array() {
+        return is_array<target_t>::value && 
+            is_same<typename remove_extent<target_t>::type,
+            char>::value;
+    }
+
+    template<typename target_t>
     constexpr bool is_string_type() {
         return
+            is_char_array<target_t>() ||
             is_same<char *, target_t>::value ||
             is_same<const char *, target_t>::value ||
             is_same<dynamic_string, target_t>::value;
