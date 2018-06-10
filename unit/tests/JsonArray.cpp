@@ -225,7 +225,7 @@ TEST(json_array, brace_initializer) {
     ASSERT_EQ(-0.4f, arr[0]);
     ASSERT_EQ("first", arr[1]);
     ASSERT_EQ(nullptr, arr[2]);
-    ASSERT_EQ(false, arr[3]);
+    ASSERT_TRUE(false == arr[3]);
     ASSERT_EQ(true, arr[4]);
     ASSERT_EQ(0.5, arr[5]);
     ASSERT_EQ(5, arr[6]);

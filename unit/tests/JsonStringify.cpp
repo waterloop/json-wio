@@ -106,7 +106,75 @@ TEST(json_stringify, primitive_object) {
     json_element el(move(obj));
 
     static char buf[512];
-    constexpr auto expected = "{\"first\":false,\"second\":true,\"third\":3,\"fourth\":-456,\"fifth\":\"hello\",\"sixth\":\"goodbye\"}";
+    constexpr auto expected = "{\"first\":false,\"fourth\":-456,\"sixth\":\"goodbye\",\"fifth\":\"hello\",\"second\":true,\"third\":3}";
     int wrt = json::stringify(buf, el);
     ASSERT_STREQ(expected, buf);
+    ASSERT_EQ(strlen(expected), static_cast<unsigned int>(wrt));
+}
+
+TEST(json_stringify, invalid_key) {
+    json_object obj;
+    obj[4] = 4;
+    json_element el(move(obj));
+    static char buf[32];
+    ASSERT_EQ(-1, json::stringify(buf, el));
+}
+
+TEST(json_stringify, very_nested) {
+    json_array random = {1, 2, 3, 4, "hello", "bye"};
+    json_array colors = {"blue", "green", "red"};
+    json_array pair3 = {3, "three"};
+    json_array pair2 = {2, "two"};
+    json_array pair1 = {1, "one", true};
+    json_array pair0 = {0, "zero", false};
+    json_object birth = {
+        "day", 25,
+        "month", "jan",
+        "year", 1998
+    };
+    json_object desc = {
+        "firstname", "jeff",
+        "lastname", "niu",
+        "birthdate", move(birth)
+    };
+    json_array pairarr = {
+        move(pair3), move(pair2), move(pair1), move(pair0)
+    };
+    json_object stuff = {
+        "pairs", move(pairarr),
+        "desc", move(desc),
+        "random", move(random),
+        "colors", move(colors)
+    };
+    json_array count0 = {move(stuff), 3, 2, 1};
+    json_array count1 = {5, 4, 3, 2, 1};
+    json_array count2 = {5, 4, 3, 2, 1};
+    json_array count3 = {"five", "three", "one"};
+    
+    json_object obj1 = {"fire", "hot"};
+    json_object obj2 = {"ice", "cold"};
+    json_object obj3 = {"water", "lukewarm"};
+    json_array objarr = {move(obj3), move(obj2), move(obj1)};
+    json_array counts = {move(count0), move(count1), move(count2), move(count3)};
+
+    json_object sigma = {
+        "objarr", move(objarr),
+        "counts", move(counts)
+    };
+    json_array single = {move(sigma)};
+
+    json_element element(move(single));
+
+    static char buf[2048];
+    int wrt = json::stringify(buf, element);
+    constexpr auto expected =
+    "[{\"counts\":[[\"one\",\"three\",\"five\"],[1,2,3,4,5],[1,2,3,4,5],"
+    "[1,2,3,{\"colors\":[\"red\",\"green\",\"blue\"],\"desc\":{\"birthda"
+    "te\":{\"month\":\"jan\",\"day\":25,\"year\":1998},\"lastname\":\"ni"
+    "u\",\"firstname\":\"jeff\"},\"pairs\":[[false,\"zero\",0],[true,\"o"
+    "ne\",1],[\"two\",2],[\"three\",3]],\"random\":[\"bye\",\"hello\",4,"
+    "3,2,1]}]],\"objarr\":[{\"fire\":\"hot\"},{\"ice\":\"cold\"},{\"wate"
+    "r\":\"lukewarm\"}]}]";
+    ASSERT_STREQ(expected, buf);
+    ASSERT_EQ(wrt, json::buff_size(element));
 }

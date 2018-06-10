@@ -24,14 +24,14 @@ namespace wlp {
         template<typename number_t, typename =
         typename enable_if<is_integral<number_t>::value
         >::type>
-        json_element(number_t integer, bool = 0) :
+        explicit json_element(number_t integer, bool = 0) :
             m_integer(static_cast<json_int>(integer)),
             m_type(type_info<number_t>::value) {}
         // floating point type constructors
         template<typename number_t, typename =
         typename enable_if<is_floating_point<number_t>::value
         >::type>
-        json_element(number_t floating, char = 0) :
+        explicit json_element(number_t floating, char = 0) :
             m_floating(static_cast<json_float>(floating)),
             m_type(type_info<number_t>::value) {}
 
@@ -66,16 +66,14 @@ namespace wlp {
         // bool and integer type assignment
         template<typename number_t>
         typename enable_type_if<
-            is_integral<number_t>::value &&
-            !is_same<json_int, number_t>::value,
+            is_integral<number_t>::value,
             json_element &>::type
         operator=(number_t i)
         { return assign(static_cast<json_int>(i), type_info<number_t>::value); }
         // floating point types
         template<typename number_t>
         typename enable_type_if<
-            is_floating_point<number_t>::value &&
-            !is_same<json_float, number_t>::value,
+            is_floating_point<number_t>::value,
             json_element &>::type
         operator=(number_t f)
         { return assign(static_cast<json_float>(f), type_info<number_t>::value); }

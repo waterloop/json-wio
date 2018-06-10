@@ -898,7 +898,7 @@ TEST(json_element, int_access) {
     ASSERT_EQ("hello", el[2]);
 
     el[1] = false;
-    ASSERT_EQ(false, el[1]);
+    ASSERT_TRUE(false == el[1]);
     el[1] = true;
     ASSERT_EQ(true, el[1]);
     el[1] = "makeup";
