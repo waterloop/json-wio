@@ -2,7 +2,7 @@ pkg:
   name: wlib-json
   description: JSON library for wio
   repository: https://github.com/waterloop/wlib-json.git
-  version: 1.0.2
+  version: 1.0.3
   author: Jeff Niu <jeffniu22@gmail.com> (https://github.com/mogball)
   contributors: []
   organization: Waterloop
