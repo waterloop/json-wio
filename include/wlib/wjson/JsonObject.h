@@ -3,8 +3,8 @@
 
 #include <wlib/hash_map>
 
-#include <wlib/Json/JsonType.h>
-#include <wlib/Json/JsonUtil.h>
+#include <wlib/wjson/JsonType.h>
+#include <wlib/wjson/JsonUtil.h>
 
 namespace wlp {
 

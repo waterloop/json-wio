@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <float.h>
 
-#include <wlib/Json/JsonElement.h>
-#include <wlib/Json/JsonNull.h>
+#include <wlib/wjson/JsonElement.h>
+#include <wlib/wjson/JsonNull.h>
 
 using namespace wlp;
 

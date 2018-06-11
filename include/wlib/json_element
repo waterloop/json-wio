@@ -1,0 +1,6 @@
+#ifndef __WLIB_JSON_JSONELEMENT__
+#define __WLIB_JSON_JSONELEMENT__
+
+#include <wlib/wjson/JsonElement.h>
+
+#endif

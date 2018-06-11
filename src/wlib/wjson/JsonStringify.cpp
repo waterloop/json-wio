@@ -2,8 +2,8 @@
 
 #include <wlib/linked_list>
 
-#include <wlib/Json/JsonStringify.h>
-#include <wlib/Json/JsonElement.h>
+#include <wlib/wjson/JsonStringify.h>
+#include <wlib/wjson/JsonElement.h>
 
 using namespace wlp;
 

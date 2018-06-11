@@ -1,7 +1,7 @@
 #include <wlib/linked_list>
 
-#include <wlib/Json/JsonParse.h>
-#include <wlib/Json/JsonElement.h>
+#include <wlib/wjson/JsonParse.h>
+#include <wlib/wjson/JsonElement.h>
 
 using namespace wlp;
 

@@ -4,10 +4,10 @@
 #include <wlib/string>
 #include <wlib/utility>
 
-#include <wlib/Json/JsonDefine.h>
-#include <wlib/Json/JsonType.h>
-#include <wlib/Json/JsonObject.h>
-#include <wlib/Json/JsonArray.h>
+#include <wlib/wjson/JsonDefine.h>
+#include <wlib/wjson/JsonType.h>
+#include <wlib/wjson/JsonObject.h>
+#include <wlib/wjson/JsonArray.h>
 
 namespace wlp {
 

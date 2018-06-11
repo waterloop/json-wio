@@ -5,8 +5,8 @@
 
 #include <wlib/utility>
 
-#include <wlib/Json/JsonType.h>
-#include <wlib/Json/JsonElement.h>
+#include <wlib/wjson/JsonType.h>
+#include <wlib/wjson/JsonElement.h>
 
 /***************************************************
  * Macro definitions
