@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <wlib/Json/JsonArray.h>
-#include <wlib/Json/JsonElement.h>
-#include <wlib/Json/JsonNull.h>
+#include <wlib/wjson/JsonArray.h>
+#include <wlib/wjson/JsonElement.h>
+#include <wlib/wjson/JsonNull.h>
 
 using namespace wlp;
 

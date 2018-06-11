@@ -1,7 +1,7 @@
 #include <Cosa/Trace.hh>
 #include <Cosa/UART.hh>
 
-#include <wlib/Json/JsonElement.h>
+#include <wlib/wjson/JsonElement.h>
 
 static wlp::json_element element;
 

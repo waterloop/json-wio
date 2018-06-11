@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <wlib/Json/JsonElement.h>
+#include <wlib/wjson/JsonElement.h>
 
 using namespace wlp;
 

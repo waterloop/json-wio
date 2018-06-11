@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <wlib/hash>
 
-#include <wlib/Json/JsonDefine.h>
-#include <wlib/Json/JsonElement.h>
+#include <wlib/wjson/JsonDefine.h>
+#include <wlib/wjson/JsonElement.h>
 
 using namespace wlp;
 
