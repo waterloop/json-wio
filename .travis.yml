@@ -12,6 +12,7 @@ addons:
       - gcc-5
       - g++-5
       - cmake
+      - valgrind
 
 install:
   - curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
@@ -25,4 +26,8 @@ script:
   - wio update pkg .
   - wio pac get
   - ./wmake test
+  - cd cmake-build-debug
+  - valgrind --leak-check=yes ./unit
+  - cd ..
+  - wio build
 
