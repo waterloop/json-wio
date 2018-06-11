@@ -6,13 +6,13 @@ using namespace wlp;
 json_object::json_object(
     json_object::size_type n,
     json_object::percent_type load) :
-    hash_map(n, load) {}
+    parent_t(n, load) {}
 
 json_object::json_object(json_object &&obj) :
-    hash_map(move(obj)) {}
+    parent_t(move(obj)) {}
 
 json_object &json_object::operator=(json_object &&obj) {
-    hash_map::operator=(move(obj));
+    parent_t::operator=(move(obj));
     return *this;
 }
 
