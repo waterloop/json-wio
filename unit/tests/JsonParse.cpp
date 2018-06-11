@@ -202,3 +202,62 @@ TEST(json_parse, primitive_object) {
     ASSERT_EQ("fifth", el["fourth"]);
     ASSERT_EQ("seventh", el["sixth"]);
 }
+
+TEST(json_parse, nested_object) {
+    constexpr auto str = 
+        "{\"hello\":{\"first\":\"last\",\"second\":\"third\",\"ninth\":[1,2,3]},"
+        "\"bye\":{\"first\":\"never\",\"second\":\"always\",\"ninth\":[5,4,3]}}";
+    json_element el = json::parse(str);
+    ASSERT_EQ(TYPE_JSON_OBJECT, el.type());
+    ASSERT_EQ(2, el.size());
+
+    json_element &hello = el["hello"];
+    json_element &bye = el["bye"];
+
+    ASSERT_EQ(TYPE_JSON_OBJECT, hello.type());
+    ASSERT_EQ(TYPE_JSON_OBJECT, bye.type());
+
+    ASSERT_EQ("last", hello["first"]);
+    ASSERT_EQ("third", hello["second"]);
+    ASSERT_EQ("never", bye["first"]);
+    ASSERT_EQ("always", bye["second"]);
+
+    json_element &hello_arr = hello["ninth"];
+    json_element &bye_arr = bye["ninth"];
+
+    ASSERT_EQ(TYPE_JSON_ARRAY, hello_arr.type());
+    ASSERT_EQ(TYPE_JSON_ARRAY, bye_arr.type());
+    ASSERT_EQ(3, hello_arr.size());
+    ASSERT_EQ(3, bye_arr.size());
+
+    ASSERT_EQ(1, hello_arr[0]);
+    ASSERT_EQ(2, hello_arr[1]);
+    ASSERT_EQ(3, hello_arr[2]);
+    ASSERT_EQ(5, bye_arr[0]);
+    ASSERT_EQ(4, bye_arr[1]);
+    ASSERT_EQ(3, bye_arr[2]);
+}
+
+TEST(json_parse, full_stack) {
+    constexpr auto str =
+    "[{\"counts\":[[\"one\",\"three\",\"five\"],[1,2,3,4,5],[1,2,3,4,5],"
+    "[1,2,3,{\"colors\":[\"red\",\"green\",\"blue\"],\"desc\":{\"birthda"
+    "te\":{\"month\":\"jan\",\"day\":25,\"year\":1998},\"lastname\":\"ni"
+    "u\",\"firstname\":\"jeff\"},\"pairs\":[[false,\"zero\",0],[true,\"o"
+    "ne\",1],[\"two\",2],[\"three\",3]],\"random\":[\"bye\",\"hello\",4,"
+    "3,2,1]}]],\"objarr\":[{\"fire\":\"hot\"},{\"ice\":\"cold\"},{\"wate"
+    "r\":\"lukewarm\"}]}]";
+    json_element el = json::parse(str);
+    ASSERT_EQ(1, el.size());
+    ASSERT_TRUE(el.is_array());
+
+    json_element &el0 = el[0];
+    ASSERT_TRUE(el0.is_object());
+    json_element &el1 = el0["counts"];
+    ASSERT_TRUE(el1.is_array());
+    json_element &el2 = el1[0];
+    ASSERT_TRUE(el2.is_array());
+    ASSERT_EQ(3, el2.size());
+    ASSERT_EQ("one", el2[0]);
+    ASSERT_EQ("five", el2[2]);
+}
