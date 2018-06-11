@@ -1,8 +1,6 @@
 #ifndef __WLIB_JSON_JSONDEFINE_H__
 #define __WLIB_JSON_JSONDEFINE_H__
 
-#define UNUSED(x) ((void) (x))
-
 #if defined(WLIB_JSON_LONG_LONG)
     #define WLIB_JSON_INTFMT "%lli"
     #define WLIB_JSON_STRTOINT(str, end) static_cast<json_int>(strtoll((str), (end), 10))

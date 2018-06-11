@@ -8,13 +8,13 @@ using namespace wlp;
 
 bool wlp::string_is_int(const char *str) {
     char *end = nullptr;
-    UNUSED(WLIB_JSON_STRTOINT(str, &end));
+    (void)(WLIB_JSON_STRTOINT(str, &end));
     return *end == '\0';
 }
 
 bool wlp::string_is_float(const char *str) {
     char *end = nullptr;
-    UNUSED(WLIB_JSON_STRTOFLOAT(str, &end));
+    (void)(WLIB_JSON_STRTOFLOAT(str, &end));
     return *end == '\0';
 }
 
