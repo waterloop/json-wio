@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include <wlib/linked_list>
 
 #include <wlib/Json/JsonStringify.h>
@@ -43,11 +45,11 @@ namespace stringify {
 
 namespace count {
     typedef int (*fcount_t)(const json_element *);
-    static int count_null(const json_element *) 
+    static int count_null(const json_element *)
     { return STR_SIZE_NULL; }
     static int count_bool(const json_element *je)
     { return static_cast<bool>(je->integer()) ? STR_SIZE_TRUE : STR_SIZE_FALSE; }
-    static int count_int(const json_element *je) 
+    static int count_int(const json_element *je)
     { return snprintf(nullptr, 0, WLIB_JSON_INTFMT, je->integer()); }
     static int count_float(const json_element *je)
     { return snprintf(nullptr, 0, WLIB_JSON_FLOATFMT, je->floating()); }
