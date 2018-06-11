@@ -19,7 +19,6 @@ pkg:
   - ALL
   board:
   - ALL
-  - uno
   compile_flags: []
   ide: none
 
