@@ -282,7 +282,7 @@ namespace convert_int {
     static json_int from_float(const json_element *je)
     { return static_cast<json_int>(je->floating()); }
     static json_int from_str(const json_element *je)
-    { return strtoll(je->string().c_str(), nullptr, 10); }
+    { return WLIB_JSON_STRTOINT(je->string().c_str(), nullptr); }
     static json_int from_arr(const json_element *je)
     { return je->array().size(); }
     static json_int from_obj(const json_element *je)
@@ -302,7 +302,7 @@ namespace convert_float {
     static json_float from_float(const json_element *je)
     { return je->floating(); }
     static json_float from_str(const json_element *je)
-    { return strtold(je->string().c_str(), nullptr); }
+    { return WLIB_JSON_STRTOFLOAT(je->string().c_str(), nullptr); }
     static json_float from_arr(const json_element *je)
     { return static_cast<json_float>(je->array().size()); }
     static json_float from_obj(const json_element *je)

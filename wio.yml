@@ -1,9 +1,9 @@
 pkg:
   name: wlib-json
   description: JSON library for wio
-  repository: "https://github.com/waterloop/wlib-json.git"
+  repository: https://github.com/waterloop/wlib-json.git
   version: 1.0.0
-  author: "Jeff Niu <jeffniu22@gmail.com> (https://github.com/mogball)"
+  author: Jeff Niu <jeffniu22@gmail.com> (https://github.com/mogball)
   contributors: []
   organization: Waterloop
   keywords:
@@ -19,6 +19,7 @@ pkg:
   - ALL
   board:
   - ALL
+  - uno
   compile_flags: []
   ide: none
 

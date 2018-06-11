@@ -120,9 +120,9 @@ static bool parse_element(const char *str, json_element *ret) {
             { return false; }
 
             if (flt)
-            { *cur = strtold(str + index, nullptr); }
+            { *cur = WLIB_JSON_STRTOFLOAT(str + index, nullptr); }
             else
-            { *cur = strtoll(str + index, nullptr, 10); }
+            { *cur = WLIB_JSON_STRTOINT(str + index, nullptr); }
             index = end - 1;
             ref_stack.pop_back();
         }

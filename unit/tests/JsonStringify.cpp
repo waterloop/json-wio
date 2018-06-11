@@ -32,8 +32,8 @@ TEST(json_stringify, primitives) {
 
     json_element el_float(-664.242342552e-4);
     wrt = json::stringify(buf, el_float);
-    ASSERT_STREQ("-0.066424234255200", buf);
-    ASSERT_EQ(18, wrt);
+    ASSERT_STREQ("-0.0664242342552000", buf);
+    ASSERT_EQ(19, wrt);
 
     constexpr auto str = "fat pigs and skinny digs";
     json_element el_string(str);

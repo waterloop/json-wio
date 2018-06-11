@@ -1,21 +1,20 @@
 #include <stdlib.h>
 #include <wlib/hash>
 
+#include <wlib/Json/JsonDefine.h>
 #include <wlib/Json/JsonElement.h>
 
 using namespace wlp;
 
 bool wlp::string_is_int(const char *str) {
     char *end = nullptr;
-    //strtoll
-    strtol(str, &end, 10);
+    UNUSED(WLIB_JSON_STRTOINT(str, &end));
     return *end == '\0';
 }
 
 bool wlp::string_is_float(const char *str) {
     char *end = nullptr;
-    //strtold
-    strtod(str, &end);
+    UNUSED(WLIB_JSON_STRTOFLOAT(str, &end));
     return *end == '\0';
 }
 

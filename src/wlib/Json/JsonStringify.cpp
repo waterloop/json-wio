@@ -26,10 +26,10 @@ namespace stringify {
     { return functions_bool[static_cast<bool>(je->integer())](ptr, je); }
 
     static int stringify_int(char *ptr, const json_element *je)
-    { return sprintf(ptr, "%lli", je->integer()); }
+    { return sprintf(ptr, WLIB_JSON_INTFMT, je->integer()); }
 
     static int stringify_float(char *ptr, const json_element *je)
-    { return sprintf(ptr, "%.15Lf", je->floating()); }
+    { return sprintf(ptr, WLIB_JSON_FLOATFMT, je->floating()); }
 
     static int stringify_string(char *ptr, const json_element *je)
     { return sprintf(ptr, "\"%s\"", je->string().c_str()); }
@@ -48,9 +48,9 @@ namespace count {
     static int count_bool(const json_element *je)
     { return static_cast<bool>(je->integer()) ? STR_SIZE_TRUE : STR_SIZE_FALSE; }
     static int count_int(const json_element *je) 
-    { return snprintf(nullptr, 0, "%lli", je->integer()); }
+    { return snprintf(nullptr, 0, WLIB_JSON_INTFMT, je->integer()); }
     static int count_float(const json_element *je)
-    { return snprintf(nullptr, 0, "%.15Lf", je->floating()); }
+    { return snprintf(nullptr, 0, WLIB_JSON_FLOATFMT, je->floating()); }
     static int count_string(const json_element *je)
     { return je->string().length() + 2; }
     static fcount_t functions[5] = {
