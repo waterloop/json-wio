@@ -3,17 +3,29 @@
 #include <Cosa/Trace.hh>
 #include <Cosa/UART.hh>
 
-static wlp::json_element element;
+using namespace wlp;
+
+static json_element element;
+static char buffer[512];
+static int cycle = 0;
 
 void setup() {
-    uart.begin(9600);
+    uart.begin(19200);
     trace.begin(&uart);
 
-    wlp::json_object obj = {
-        "first", 1,
-        "second", 2
+    json_object payload = {
+        "board", "mega2560",
+        "month", "jan",
+        "day", 25,
+        "year", 1998
     };
-    element = move(obj);
+
+    element = move(payload);
 }
 
-void loop() {}
+void loop() {
+    element["cycle"] = cycle++;
+    json::stringify(buffer, element);
+    trace << buffer << endl;
+    delay(500);
+}
