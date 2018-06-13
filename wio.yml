@@ -27,7 +27,7 @@ targets:
   default: tests
   create:
     tests:
-      board: mega2560
+      board: uno
       target_compile_flags: []
       pkg_compile_flags: []
 
