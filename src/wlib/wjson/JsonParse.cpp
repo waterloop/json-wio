@@ -66,7 +66,7 @@ static bool parse_element(const char *str, json_element *ret) {
     bool flt;
     char ch;
 
-    linked_list<json_element *> ref_stack;
+    linked_list<void *> ref_stack;
 
     ref_stack.push_back(ret);
 
@@ -74,7 +74,7 @@ static bool parse_element(const char *str, json_element *ret) {
 
         index = skip_ahead(str, index);
         ch = str[index];
-        cur = ref_stack.back();
+        cur = static_cast<json_element *>(ref_stack.back());
 
         // comma
         if (ch == ',') {
@@ -236,7 +236,7 @@ static bool parse_element(const char *str, json_element *ret) {
 
         // end of object
         else if (is_object_end(ch)) {
-            if (ref_stack.empty() || !ref_stack.back()->is_object())
+            if (ref_stack.empty() || !static_cast<json_element *>(ref_stack.back())->is_object())
             { return false; }
             // pop off object
             ref_stack.pop_back();
@@ -245,7 +245,7 @@ static bool parse_element(const char *str, json_element *ret) {
 
         // end of array
         else if (is_array_end(ch)) {
-            if (ref_stack.empty() || !ref_stack.back()->is_array())
+            if (ref_stack.empty() || !static_cast<json_element *>(ref_stack.back())->is_array())
             { return false; }
             // pop off the array
             ref_stack.pop_back();

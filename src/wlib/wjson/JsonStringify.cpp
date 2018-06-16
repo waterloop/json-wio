@@ -70,9 +70,9 @@ int json::buff_size(const json_element &je) {
     linked_list<const json_element *> stack;
     stack.push_back(&je);
     linked_list<json_array::const_iterator> array_its;
-    linked_list<const json_array *> array_stack;
+    linked_list<const void *> array_stack;
     linked_list<json_object::const_iterator> object_its;
-    linked_list<const json_object *> object_stack;
+    linked_list<const void *> object_stack;
     while (!stack.empty()) {
         cur = stack.back();
         cls = cur->type() >> 4;
