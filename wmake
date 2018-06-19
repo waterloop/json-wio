@@ -55,6 +55,11 @@ _test() {
     _run
 }
 
+_extract() {
+    cp .wio/build/targets/tests/tests.elf build/tests.elf
+    cp .wio/build/targets/tests/tests.hex build/tests.hex
+}
+
 _simple() {
     root_dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
     root_dir_name=$(basename "$root_dir")
@@ -73,6 +78,8 @@ _simple() {
         _run
     elif [ "$1" == 'test' ] ; then
         _test
+    elif [ "$1" == 'extract' ] ; then
+        _extract
     else
         _print_help
     fi

@@ -166,7 +166,7 @@ TEST(json_stringify, very_nested) {
     json_element element(move(single));
 
     static char buf[2048];
-    int wrt = json::stringify(buf, element);
+    json::stringify(buf, element);
     constexpr auto expected =
     "[{\"counts\":[[\"one\",\"three\",\"five\"],[1,2,3,4,5],[1,2,3,4,5],"
     "[1,2,3,{\"colors\":[\"red\",\"green\",\"blue\"],\"desc\":{\"birthda"
@@ -176,5 +176,4 @@ TEST(json_stringify, very_nested) {
     "3,2,1]}]],\"objarr\":[{\"fire\":\"hot\"},{\"ice\":\"cold\"},{\"wate"
     "r\":\"lukewarm\"}]}]";
     ASSERT_STREQ(expected, buf);
-    ASSERT_EQ(wrt, json::buff_size(element));
 }
