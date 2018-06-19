@@ -1,7 +1,9 @@
-#include <wlib/linked_list>
+#include "Internal.h"
 
 #include <wlib/wjson/JsonParse.h>
 #include <wlib/wjson/JsonElement.h>
+
+#include <wlib/linked_list>
 
 using namespace wlp;
 
@@ -66,15 +68,15 @@ static bool parse_element(const char *str, json_element *ret) {
     bool flt;
     char ch;
 
-    linked_list<void *> ref_stack;
+    linked_list<json_union> ref_stack;
 
-    ref_stack.push_back(ret);
+    ref_stack.push_back(json_union(ret));
 
     while (!ref_stack.empty()) {
 
         index = skip_ahead(str, index);
         ch = str[index];
-        cur = static_cast<json_element *>(ref_stack.back());
+        cur = static_cast<json_element *>(ref_stack.back().ref);
 
         // comma
         if (ch == ',') {
@@ -99,14 +101,14 @@ static bool parse_element(const char *str, json_element *ret) {
                 if (str[index] != ':') 
                 { return false; }
                 ++index;
-                ref_stack.push_back(&*itp.first());
+                ref_stack.push_back(json_union(&*itp.first()));
             }
 
             // active array
             else if (cur->is_array()) {
                 // load next element
                 cur->array().push_back(nullptr);
-                ref_stack.push_back(&cur->array().back());
+                ref_stack.push_back(json_union(&cur->array().back()));
                 ++index;
             }
 
@@ -158,7 +160,7 @@ static bool parse_element(const char *str, json_element *ret) {
             // initiate next element
             else {
                 cur->array().push_back(nullptr);
-                ref_stack.push_back(&cur->array().back());
+                ref_stack.push_back(json_union(&cur->array().back()));
                 ++index;
             }
         }
@@ -200,7 +202,7 @@ static bool parse_element(const char *str, json_element *ret) {
                 { return false; }
                 ++index;
 
-                ref_stack.push_back(&*itp.first());
+                ref_stack.push_back(json_union(&*itp.first()));
             }
         }
 
@@ -236,7 +238,7 @@ static bool parse_element(const char *str, json_element *ret) {
 
         // end of object
         else if (is_object_end(ch)) {
-            if (ref_stack.empty() || !static_cast<json_element *>(ref_stack.back())->is_object())
+            if (ref_stack.empty() || !static_cast<json_element *>(ref_stack.back().ref)->is_object())
             { return false; }
             // pop off object
             ref_stack.pop_back();
@@ -245,7 +247,7 @@ static bool parse_element(const char *str, json_element *ret) {
 
         // end of array
         else if (is_array_end(ch)) {
-            if (ref_stack.empty() || !static_cast<json_element *>(ref_stack.back())->is_array())
+            if (ref_stack.empty() || !static_cast<json_element *>(ref_stack.back().ref)->is_array())
             { return false; }
             // pop off the array
             ref_stack.pop_back();

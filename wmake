@@ -30,7 +30,7 @@ _build(){
     echo "Running CMake"
     cmake ..
     echo "Running Make"
-    make
+    make -j6
     echo "Project Built"
     cd ..
 }
@@ -40,6 +40,15 @@ _clean(){
         cd cmake-build-debug
         make clean
     fi
+}
+
+_wio() {
+    wio build --verbose
+}
+
+_size() {
+    nm --size-sort --radix=d build/tests.elf
+    size build/tests.elf
 }
 
 _reset() {
@@ -80,6 +89,10 @@ _simple() {
         _test
     elif [ "$1" == 'extract' ] ; then
         _extract
+    elif [ "$1" == 'wio' ] ; then
+        _wio
+    elif [ "$1" == 'size' ] ; then
+        _size
     else
         _print_help
     fi

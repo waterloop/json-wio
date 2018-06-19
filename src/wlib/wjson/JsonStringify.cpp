@@ -1,33 +1,14 @@
-#include <stdio.h>
-
-#include <wlib/linked_list>
+#include "Internal.h"
 
 #include <wlib/wjson/JsonStringify.h>
 #include <wlib/wjson/JsonElement.h>
 
-#define const_void_cast(ptr) const_cast<void *>(static_cast<const void *>(ptr))
+#include <wlib/linked_list>
+#include <stdio.h>
+
+#define union_cast(ptr) json_union(const_cast<void *>(static_cast<const void *>(ptr)))
 
 using namespace wlp;
-
-struct json_iterator {
-    union {
-        json_object::const_iterator obj;
-        json_array::const_iterator arr;
-    };
-
-    json_iterator();
-    explicit json_iterator(const json_object::const_iterator &it);
-    explicit json_iterator(const json_array::const_iterator &it);
-    json_iterator &operator=(json_iterator &&it) noexcept;
-};
-
-json_iterator::json_iterator() {}
-json_iterator::json_iterator(const json_object::const_iterator &it) : obj(it) {}
-json_iterator::json_iterator(const json_array::const_iterator &it) : arr(it) {}
-json_iterator &json_iterator::operator=(json_iterator &&it) noexcept {
-    memcpy(this, &it, sizeof(json_iterator));
-    return *this;
-}
 
 namespace stringify {
     typedef int (*fstringify_t)(char *, const json_element *);
@@ -72,17 +53,17 @@ int json::stringify(char *buf, const json_element &je) {
     int dif;
     json_type_t cls;
 
-    linked_list<void *> stack;
-    stack.push_back(const_void_cast(&je));
+    linked_list<json_union> stack;
+    stack.push_back(union_cast(&je));
 
-    linked_list<json_iterator> array_its;
-    linked_list<void *> array_stack;
+    linked_list<json_union> array_its;
+    linked_list<json_union> array_stack;
 
-    linked_list<json_iterator> object_its;
-    linked_list<void *> object_stack;
+    linked_list<json_union> object_its;
+    linked_list<json_union> object_stack;
 
     while (!stack.empty()) {
-        cur = static_cast<const json_element *>(stack.back());
+        cur = static_cast<const json_element *>(stack.back().ref);
 
         cls = cur->type() >> 4;
 
@@ -108,25 +89,25 @@ int json::stringify(char *buf, const json_element &je) {
             }
 
             // initiate another array
-            else if (array_stack.empty() || &cur->array() != static_cast<const json_array *>(array_stack.back()))  {
+            else if (array_stack.empty() || &cur->array() != static_cast<const json_array *>(array_stack.back().ref))  {
                 *buf = '[';
                 ++buf;
                 ++wrt;
 
                 // hold the reference to the latest array being written
-                array_stack.push_back(const_void_cast(&cur->array()));
+                array_stack.push_back(union_cast(&cur->array()));
                 // keep a stack of iterators for each array too
                 json_array::const_iterator begin = cur->array().begin();
-                array_its.push_back(json_iterator(begin));
+                array_its.push_back(json_union(begin));
 
                 // load the first element on the stack
-                stack.push_back(const_void_cast(&*begin));
+                stack.push_back(union_cast(&*begin));
                 // increment the iterator to next
                 ++array_its.back().arr;
             }
 
             // move to next element
-            else if (!array_stack.empty() && &cur->array() == static_cast<const json_array *>(array_stack.back())) {
+            else if (!array_stack.empty() && &cur->array() == static_cast<const json_array *>(array_stack.back().ref)) {
                 // write comma
                 *buf = ',';
                 ++buf;
@@ -145,7 +126,7 @@ int json::stringify(char *buf, const json_element &je) {
 
                 // load next element
                 else {
-                    stack.push_back(const_void_cast(&*array_its.back().arr));
+                    stack.push_back(union_cast(&*array_its.back().arr));
                     ++array_its.back().arr;
                 }
             }
@@ -166,16 +147,16 @@ int json::stringify(char *buf, const json_element &je) {
             }
 
             // initiate object
-            else if (object_stack.empty() || &cur->object() != static_cast<const json_object *>(object_stack.back())) {
+            else if (object_stack.empty() || &cur->object() != static_cast<const json_object *>(object_stack.back().ref)) {
                 *buf = '{';
                 ++buf;
                 ++wrt;
 
                 // hold reference to latest object
-                object_stack.push_back(const_void_cast(&cur->object()));
+                object_stack.push_back(union_cast(&cur->object()));
                 // keep stack of iterators
                 json_object::const_iterator begin = cur->object().begin();
-                object_its.push_back(json_iterator(begin));
+                object_its.push_back(json_union(begin));
 
                 // return error if key is not string
                 const json_element &key = begin.key();
@@ -187,13 +168,13 @@ int json::stringify(char *buf, const json_element &je) {
                 wrt += dif;
 
                 // load first element
-                stack.push_back(const_void_cast(&*begin));
+                stack.push_back(union_cast(&*begin));
                 // increment next iterator
                 ++object_its.back().obj;
             }
 
             // write next key and load object
-            else if (!object_stack.empty() && &cur->object() == static_cast<const json_object *>(object_stack.back())) {
+            else if (!object_stack.empty() && &cur->object() == static_cast<const json_object *>(object_stack.back().ref)) {
                 // write comma
                 *buf = ',';
                 ++buf;
@@ -219,7 +200,7 @@ int json::stringify(char *buf, const json_element &je) {
                     buf += dif;
                     wrt += dif;
 
-                    stack.push_back(const_void_cast(&*object_its.back().obj));
+                    stack.push_back(union_cast(&*object_its.back().obj));
                     ++object_its.back().obj;
                 }
             }
