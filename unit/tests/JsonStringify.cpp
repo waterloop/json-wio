@@ -50,7 +50,7 @@ TEST(json_stringify, empty_array) {
     static char buf[16];
     int wrt = json::stringify(buf, el);
     ASSERT_STREQ("[]", buf);
-    ASSERT_EQ(2, wrt);    
+    ASSERT_EQ(2, wrt);
 }
 
 TEST(json_stringify, singleton_array) {
@@ -106,7 +106,7 @@ TEST(json_stringify, primitive_object) {
     json_element el(move(obj));
 
     static char buf[512];
-    constexpr auto expected = "{\"first\":false,\"fourth\":-456,\"sixth\":\"goodbye\",\"fifth\":\"hello\",\"second\":true,\"third\":3}";
+    constexpr auto expected = "{\"second\":true,\"first\":false,\"sixth\":\"goodbye\",\"fifth\":\"hello\",\"fourth\":-456,\"third\":3}";
     int wrt = json::stringify(buf, el);
     ASSERT_STREQ(expected, buf);
     ASSERT_EQ(strlen(expected), static_cast<unsigned int>(wrt));
@@ -150,7 +150,7 @@ TEST(json_stringify, very_nested) {
     json_array count1 = {5, 4, 3, 2, 1};
     json_array count2 = {5, 4, 3, 2, 1};
     json_array count3 = {"five", "three", "one"};
-    
+
     json_object obj1 = {"fire", "hot"};
     json_object obj2 = {"ice", "cold"};
     json_object obj3 = {"water", "lukewarm"};
@@ -170,8 +170,8 @@ TEST(json_stringify, very_nested) {
     constexpr auto expected =
     "[{\"counts\":[[\"one\",\"three\",\"five\"],[1,2,3,4,5],[1,2,3,4,5],"
     "[1,2,3,{\"colors\":[\"red\",\"green\",\"blue\"],\"desc\":{\"birthda"
-    "te\":{\"month\":\"jan\",\"day\":25,\"year\":1998},\"lastname\":\"ni"
-    "u\",\"firstname\":\"jeff\"},\"pairs\":[[false,\"zero\",0],[true,\"o"
+    "te\":{\"day\":25,\"year\":1998,\"month\":\"jan\"},\"firstname\":\"j"
+    "eff\",\"lastname\":\"niu\"},\"pairs\":[[false,\"zero\",0],[true,\"o"
     "ne\",1],[\"two\",2],[\"three\",3]],\"random\":[\"bye\",\"hello\",4,"
     "3,2,1]}]],\"objarr\":[{\"fire\":\"hot\"},{\"ice\":\"cold\"},{\"wate"
     "r\":\"lukewarm\"}]}]";

@@ -126,7 +126,7 @@ TEST(json_object, integer_keys) {
     ASSERT_EQ(obj[k2], str_e);
 
     json_element k5(100);
-    ASSERT_EQ(obj[k5], json::null);
+    ASSERT_EQ(obj[k5], *json::null());
 }
 
 TEST(json_object, float_keys) {
@@ -218,8 +218,8 @@ TEST(json_object, move_insert) {
 
     obj.insert(move(key), move(val));
 
-    ASSERT_EQ(json::null, key);
-    ASSERT_EQ(json::null, val);
+    ASSERT_EQ(*json::null(), key);
+    ASSERT_EQ(*json::null(), val);
 
     ASSERT_EQ(1, obj.size());
 

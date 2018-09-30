@@ -1,11 +1,12 @@
-pkg:
+type: pkg
+
+project:
   name: wlib-json
+  version: 1.0.4
+  organization: Waterloop
   description: JSON library for wio
   repository: https://github.com/waterloop/wlib-json.git
-  version: 1.0.4
   author: Jeff Niu <jeffniu22@gmail.com> (https://github.com/mogball)
-  contributors: []
-  organization: Waterloop
   keywords:
   - wio
   - c
@@ -13,29 +14,46 @@ pkg:
   - json
   - waterloop
   - embedded
-  license: MIT
-  header_only: false
-  platform: ALL
-  framework:
-  - ALL
-  board:
-  - ALL
-  - uno
-  compile_flags: []
-  ide: none
+  definitions:
+      required:
+        private:
+        - WLIB_TLSF_ARCH
+        - WLIB_TLSF_LOG2_DIV
+        - WLIB_TLSF_LOG2_ALIGN
+        - WLIB_TLSF_LOG2_MAX
+  compile_options:
+    wio_version: 0.4.1
+    default_target: tests
 
 targets:
-  default: tests
-  create:
-    tests:
-      board: uno
-      target_compile_flags: []
-      pkg_compile_flags: []
+  tests:
+    src: tests
+    platform: avr
+    framework: cosa
+    board: mega2560
+    definitions:
+      package:
+      - WLIB_TLSF_ARCH=16
+      - WLIB_TLSF_LOG2_DIV=3
+      - WLIB_TLSF_LOG2_ALIGN=1
+      - WLIB_TLSF_LOG2_MAX=11
+  native-tests:
+    src: native-tests
+    platform: native
+    definitions:
+      package:
+      - WLIB_TLSF_ARCH=64
+      - WLIB_TLSF_LOG2_DIV=4
+      - WLIB_TLSF_LOG2_ALIGN=3
+      - WLIB_TLSF_LOG2_MAX=20
 
 dependencies:
-  wlib-wio:
-    version: 2.1.3
-    vendor: false
-    compile_flags:
-    - -DMAX_ALLOCATORS=10u
-    - -DNUM_BLOCKS=400u
+  wlib-stl:
+    version: 3.0.2
+    link_visibility: PUBLIC
+    definitions:
+    - $(WLIB_TLSF_ARCH)
+    - $(WLIB_TLSF_LOG2_DIV)
+    - $(WLIB_TLSF_LOG2_ALIGN)
+    - $(WLIB_TLSF_LOG2_MAX)
+

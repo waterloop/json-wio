@@ -1,4 +1,5 @@
 #include "Internal.h"
+#include "Placement.h"
 
 #include <wlib/wjson/JsonParse.h>
 #include <wlib/wjson/JsonElement.h>
@@ -22,25 +23,25 @@ static bool between(char i)
  * Function prototypes
  **************************************************************************/
 static bool parse_element(const char *str, json_element *ret);
-static size_type skip_ahead(const char *str, size_type index);
+static size_t skip_ahead(const char *str, size_t index);
 
 static bool is_number_start(char ch);
 static bool is_number_exit(char ch);
 static bool is_digit(char ch);
 static bool is_exponent(char ch);
-static bool number_scan(const char *str, size_type index, size_type *end, bool *flt);
+static bool number_scan(const char *str, size_t index, size_t *end, bool *flt);
 
 static bool is_true_start(char ch);
 static bool is_false_start(char ch);
 static bool is_null_start(char ch);
-static bool true_scan(const char *str, size_type index, size_type *end);
-static bool false_scan(const char *str, size_type index, size_type *end);
-static bool null_scan(const char *str, size_type index, size_type *end);
+static bool true_scan(const char *str, size_t index, size_t *end);
+static bool false_scan(const char *str, size_t index, size_t *end);
+static bool null_scan(const char *str, size_t index, size_t *end);
 
 static bool is_string_start(char ch);
 static bool is_hexadecimal(char ch);
 static bool is_valid_escape(char ch);
-static bool string_scan(const char *str, size_type index, size_type *end);
+static bool string_scan(const char *str, size_t index, size_t *end);
 
 static bool is_array_start(char ch);
 static bool is_array_end(char ch);
@@ -60,11 +61,11 @@ json_element json::parse(const char *str) {
  * Function definitions
  **************************************************************************/
 static bool parse_element(const char *str, json_element *ret) {
-    size_type index = 0;
+    size_t index = 0;
 
     json_element *cur;
-    size_type end;
-    size_type len;
+    size_t end;
+    size_t len;
     bool flt;
     char ch;
 
@@ -88,17 +89,17 @@ static bool parse_element(const char *str, json_element *ret) {
                 index = skip_ahead(str, index);
                 if (!is_string_start(str[index]))
                 { return false; }
-                if (!string_scan(str, index, &end)) 
+                if (!string_scan(str, index, &end))
                 { return false; }
                 len = end - index;
                 dynamic_string string(str + index + 1, len - 2);
                 index = end;
-                
+
                 auto itp = cur->object().insert(move(string), nullptr);
                 if (!itp.second())
                 { return false; }
                 index = skip_ahead(str, index);
-                if (str[index] != ':') 
+                if (str[index] != ':')
                 { return false; }
                 ++index;
                 ref_stack.push_back(json_union(&*itp.first()));
@@ -261,7 +262,7 @@ static bool parse_element(const char *str, json_element *ret) {
     return true;
 }
 
-static size_type skip_ahead(const char *str, size_type index) {
+static size_t skip_ahead(const char *str, size_t index) {
     char ch;
     char nt;
     while ((ch = str[index]) != '\0') {
@@ -373,7 +374,7 @@ namespace number_sm {
         n_st_sign, n_st_value
     };
 }
-static bool number_scan(const char *str, size_type index, size_type *end, bool *flt) {
+static bool number_scan(const char *str, size_t index, size_t *end, bool *flt) {
     state_t state = number_sm::N_ST_START;
     *flt = false;
     do {
@@ -393,25 +394,25 @@ static bool number_scan(const char *str, size_type index, size_type *end, bool *
 static bool is_true_start(char ch) { return ch == 't'; }
 static bool is_false_start(char ch) { return ch == 'f'; }
 static bool is_null_start(char ch) { return ch == 'n'; }
-static bool true_scan(const char *str, size_type index, size_type *end) {
+static bool true_scan(const char *str, size_t index, size_t *end) {
     static char str_true[] = STR_TRUE;
-    for (size_type i = 0; i < STR_SIZE_TRUE; ++i, ++index) {
+    for (size_t i = 0; i < STR_SIZE_TRUE; ++i, ++index) {
         if (str[index] != str_true[i]) { return false; }
     }
     *end = index;
     return true;
 }
-static bool false_scan(const char *str, size_type index, size_type *end) {
+static bool false_scan(const char *str, size_t index, size_t *end) {
     static char str_false[] = STR_FALSE;
-    for (size_type i = 0; i < STR_SIZE_FALSE; ++i, ++index) {
+    for (size_t i = 0; i < STR_SIZE_FALSE; ++i, ++index) {
         if (str[index] != str_false[i]) { return false; }
     }
     *end = index;
     return true;
 }
-static bool null_scan(const char *str, size_type index, size_type *end) {
+static bool null_scan(const char *str, size_t index, size_t *end) {
     static char str_null[] = STR_NULL;
-    for (size_type i = 0; i < STR_SIZE_NULL; ++i, ++index) {
+    for (size_t i = 0; i < STR_SIZE_NULL; ++i, ++index) {
         if (str[index] != str_null[i]) { return false; }
     }
     *end = index;
@@ -474,7 +475,7 @@ namespace string_sm {
         n_st_hex_0, n_st_hex_1, n_st_hex_2, n_st_hex_3
     };
 }
-static bool string_scan(const char *str, size_type index, size_type *end) {
+static bool string_scan(const char *str, size_t index, size_t *end) {
     state_t state = string_sm::S_ST_START;
     do {
         state = string_sm::transition[state](str[index]);

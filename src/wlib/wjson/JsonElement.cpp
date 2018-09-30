@@ -1,8 +1,10 @@
-#include <stdio.h>
-#include <float.h>
+#include "Placement.h"
 
 #include <wlib/wjson/JsonElement.h>
 #include <wlib/wjson/JsonNull.h>
+
+#include <stdio.h>
+#include <float.h>
 
 using namespace wlp;
 
@@ -15,13 +17,13 @@ json_element::json_element(nullptr_t) :
 // string type constructors
 json_element::json_element(char *str) : json_element(
         static_cast<const char *>(str),
-        static_cast<size_type>(strlen(str))) {}
-json_element::json_element(char *str, size_type size) :
+        static_cast<size_t>(strlen(str))) {}
+json_element::json_element(char *str, size_t size) :
     json_element(static_cast<const char *>(str), size) {}
 json_element::json_element(const char *str) :
-    json_element(str, static_cast<size_type>(strlen(str))) {}
+    json_element(str, static_cast<size_t>(strlen(str))) {}
 
-json_element::json_element(const char *str, size_type size) :
+json_element::json_element(const char *str, size_t size) :
     m_string(str, size),
     m_type(TYPE_JSON_STRING) {}
 
@@ -164,7 +166,7 @@ json_element &json_element::assign(json_float f, json_type type) {
     return *this;
 }
 // string assignment
-json_element &json_element::assign(const char *str, size_type len) {
+json_element &json_element::assign(const char *str, size_t len) {
     destroy::functions[m_type >> 4](this);
     ::new(&m_string) dynamic_string(str, len);
     m_type = TYPE_JSON_STRING;
@@ -172,10 +174,10 @@ json_element &json_element::assign(const char *str, size_type len) {
 }
 
 json_element &json_element::operator=(char *str)
-{ return assign(str, static_cast<size_type>(strlen(str))); }
+{ return assign(str, static_cast<size_t>(strlen(str))); }
 
 json_element &json_element::operator=(const char *str)
-{ return assign(str, static_cast<size_type>(strlen(str))); }
+{ return assign(str, static_cast<size_t>(strlen(str))); }
 
 json_element &json_element::operator=(const dynamic_string &str)
 { return assign(str.c_str(), str.length()); }
@@ -322,12 +324,12 @@ json_int json_element::convert_to_int() const
 { return convert_int::converter[m_type >> 4](this); }
 json_float json_element::convert_to_float() const
 { return convert_float::converter[m_type >> 4](this); }
-const char *json_element::convert_to_string() const 
+const char *json_element::convert_to_string() const
 { return is_string() ? m_string.c_str() : nullptr; }
 const json_array &json_element::convert_to_array() const
-{ return is_array() ? m_array : json::array::null; }
+{ return is_array() ? m_array : *json::array::null(); }
 const json_object &json_element::convert_to_object() const
-{ return is_object() ? m_object : json::object::null; }
+{ return is_object() ? m_object : *json::object::null(); }
 
 // handle conversion to dynamic_string
 dynamic_string json_element::convert_to_dynamic_string() const
@@ -335,12 +337,12 @@ dynamic_string json_element::convert_to_dynamic_string() const
 
 // generic access
 json_element &json_element::operator[](nullptr_t) {
-    if (!is_object()) 
-    { return const_cast<json_element &>(json::null); }
+    if (!is_object())
+    { return const_cast<json_element &>(*json::null()); }
     return m_object[nullptr];
 }
 const json_element &json_element::operator[](nullptr_t) const {
-    if (!is_object()) { return json::null; }
+    if (!is_object()) { return *json::null(); }
     return m_object.at(nullptr);
 }
 
@@ -353,88 +355,88 @@ namespace access_int {
     { return je->array()[i]; }
     static json_element &access_object(json_element *je, json_int i)
     { return je->object()[i]; }
-    static const json_element &const_object(const json_element *je, json_int i) 
+    static const json_element &const_object(const json_element *je, json_int i)
     { return je->object().at(i); }
-    static fun_t functions[2] = 
+    static fun_t functions[2] =
     { access_array, access_object };
     static const_t const_functions[2] =
     { const_array, const_object };
 }
 json_element &json_element::access(json_int i) {
-    if (m_type < TYPE_JSON_ARRAY) 
-    { return const_cast<json_element &>(json::null); }
+    if (m_type < TYPE_JSON_ARRAY)
+    { return const_cast<json_element &>(*json::null()); }
     return access_int::functions[m_type - TYPE_JSON_ARRAY](this, i);
 }
 const json_element &json_element::access(json_int i) const {
-    if (m_type < TYPE_JSON_ARRAY) { return json::null; }
+    if (m_type < TYPE_JSON_ARRAY) { return *json::null(); }
     return access_int::const_functions[m_type - TYPE_JSON_ARRAY](this, i);
 }
 
 json_element &json_element::access(json_float f) {
-    if (!is_object()) 
-    { return const_cast<json_element &>(json::null); }
+    if (!is_object())
+    { return const_cast<json_element &>(*json::null()); }
     return m_object[f];
 }
 const json_element &json_element::access(json_float f) const {
-    if (!is_object()) { return json::null; }
+    if (!is_object()) { return *json::null(); }
     return m_object.at(f);
 }
 
 json_element &json_element::access(const char *str) {
     if (!is_object())
-    { return const_cast<json_element &>(json::null); }
+    { return const_cast<json_element &>(*json::null()); }
     return m_object[str];
 }
 const json_element &json_element::access(const char *str) const {
-    if (!is_object()) { return json::null; }
+    if (!is_object()) { return *json::null(); }
     return m_object.at(str);
 }
 
-json_element &json_element::operator[](const dynamic_string &str) { 
+json_element &json_element::operator[](const dynamic_string &str) {
     if (!is_object())
-    { return const_cast<json_element &>(json::null); }
+    { return const_cast<json_element &>(*json::null()); }
     return m_object[str];
 }
 const json_element &json_element::operator[](const dynamic_string &str) const {
-    if (!is_object()) { return json::null; }
+    if (!is_object()) { return *json::null(); }
     return m_object.at(str);
 }
 
 json_element &json_element::operator[](const json_element &je) {
     if (je.is_int()) { return operator[](je.integer()); }
-    if (!is_object()) 
-    { return const_cast<json_element &>(json::null); }
+    if (!is_object())
+    { return const_cast<json_element &>(*json::null()); }
     return m_object[je];
 }
 const json_element &json_element::operator[](const json_element &je) const {
     if (je.is_int()) { return operator[](je.integer()); }
-    if (!is_object()) { return json::null; }
+    if (!is_object()) { return *json::null(); }
     return m_object.at(je);
 }
 
 // size query
 namespace size_query {
-    typedef size_type (*size_get_func_t)(const json_element *);
+    typedef size_t (*size_get_func_t)(const json_element *);
 
-    static size_type from_string(const json_element *je)
+    static size_t from_string(const json_element *je)
     { return je->string().length(); }
-    static size_type from_array(const json_element *je)
+    static size_t from_array(const json_element *je)
     { return je->array().size(); }
-    static size_type from_object(const json_element *je) 
+    static size_t from_object(const json_element *je)
     { return je->object().size(); }
-    static size_get_func_t functions[3] = 
+    static size_get_func_t functions[3] =
     { from_string, from_array, from_object };
 
-    static size_type jump_true(const json_element *je) 
+    static size_t jump_true(const json_element *je)
     { return functions[(je->type() >> 4) - CLASS_STRING](je); }
-    static size_type jump_false(const json_element *je)
+    static size_t jump_false(const json_element *je)
     { return 0; }
-    static size_get_func_t jump[2] = 
+    static size_get_func_t jump[2] =
     { jump_false, jump_true };
 }
-size_type json_element::size() const 
+size_t json_element::size() const
 { return size_query::jump[m_type >> 6](this); }
-size_type json_element::length() const
+size_t json_element::length() const
 { return size(); }
 
 // getters

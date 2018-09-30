@@ -7,18 +7,30 @@ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Os -ffunction-sections -fdata-sections -fno-rtti")
 
-set(WLIB_DIR ${CMAKE_CURRENT_LIST_DIR}/.wio/node_modules/wlib-wio)
+set(WIO_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR}/.wio/node_modules)
+
+set(wlib-stl_dir ${WIO_MODULE_DIR}/wlib-stl__3.0.2)
+set(wlib-mem_dir ${WIO_MODULE_DIR}/wlib-memory__1.0.4)
+set(wlib-mal_dir ${WIO_MODULE_DIR}/wlib-malloc__1.0.4)
+set(wlib-tmp_dir ${WIO_MODULE_DIR}/wlib-tmp__1.0.2)
+
 set(JSON_DIR ${CMAKE_CURRENT_LIST_DIR})
 set(GTEST_DIR ${CMAKE_CURRENT_LIST_DIR}/googletest/googletest)
 
-file(GLOB_RECURSE WLIB_FILES
-    ${WLIB_DIR}/include/wlib/**/*.h
-    ${WLIB_DIR}/src/wlib/**/*.cpp
+foreach (module wlib-stl)
+    set(dir ${${module}_dir})
+    file(GLOB_RECURSE ${module}_files ${dir}/src/*.cpp ${dir}/src/**/*.cpp)
+    add_library(${module} ${${module}_files})
+    target_include_directories(${module} PUBLIC ${dir}/include)
+endforeach ()
+foreach (module wlib-stl wlib-mal wlib-mem wlib-tmp)
+    set(${module}_include ${${module}_dir}/include)
+endforeach ()
+target_include_directories(wlib-stl PRIVATE
+    ${wlib-mem_include}
+    ${wlib-tmp_include}
+    ${wlib-mal_include}
     )
-
-add_library(wlib ${WLIB_FILES})
-target_include_directories(wlib PUBLIC ${WLIB_DIR}/include)
-target_compile_definitions(wlib PUBLIC MAX_ALLOCATORS=10u NUM_BLOCKS=400u)
 
 file(GLOB_RECURSE JSON_FILES
     ${JSON_DIR}/include/wlib/**/*.h
@@ -26,14 +38,17 @@ file(GLOB_RECURSE JSON_FILES
     )
 
 add_library(json ${JSON_FILES})
-target_link_libraries(json wlib)
-target_compile_definitions(json PUBLIC 
-    WLIB_JSON_LONG_DOUBLE 
+target_link_libraries(json wlib-stl)
+target_compile_definitions(json PUBLIC
+    WLIB_JSON_LONG_DOUBLE
     WLIB_JSON_LONG_LONG
     )
 target_include_directories(json PUBLIC
     ${JSON_DIR}/include
-    ${WLIB_DIR}/include
+    ${wlib-stl_include}
+    ${wlib-tmp_include}
+    ${wlib-mem_include}
+    ${wlib-mal_include}
     )
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/googletest)
@@ -43,7 +58,7 @@ file(GLOB_RECURSE UNIT_FILES
     )
 
 add_executable(unit ${UNIT_FILES})
-target_link_libraries(unit json wlib gtest)
+target_link_libraries(unit json gtest)
 target_include_directories(unit PUBLIC
     ${WLIB_DIR}/include
     ${JSON_DIR}/include

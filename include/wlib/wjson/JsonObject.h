@@ -20,7 +20,7 @@ namespace wlp {
             json_element_hash,
             json_element_equals> {
 
-        typedef object_t<json_element, json_element, 
+        typedef object_t<json_element, json_element,
             json_element_hash, json_element_equals> parent_t;
         enum {
             DEFAULT_SIZE = 12,
@@ -28,7 +28,7 @@ namespace wlp {
         };
 
     public:
-        explicit json_object(size_type n = DEFAULT_SIZE, percent_type load = DEFAULT_LOAD);
+        explicit json_object(size_t n = DEFAULT_SIZE, percent_type load = DEFAULT_LOAD);
 
         json_object(json_object &&obj);
         json_object &operator=(json_object &&obj);
@@ -37,7 +37,7 @@ namespace wlp {
         json_object &operator=(const json_object &) = delete;
 
         template<typename ...arg_t>
-        json_object(arg_t &&...args) : parent_t(sizeof...(arg_t) / 2, DEFAULT_LOAD) 
+        json_object(arg_t &&...args) : parent_t(sizeof...(arg_t) / 2, DEFAULT_LOAD)
         { prv_insert(forward<arg_t>(args)...); }
 
     public:

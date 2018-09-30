@@ -1,9 +1,11 @@
+#include "Placement.h"
+
 #include <wlib/wjson/JsonArray.h>
 #include <wlib/wjson/JsonElement.h>
 
 using namespace wlp;
 
-json_array::json_array(size_type n) : parent_t(n) {}
+json_array::json_array(size_t n) : parent_t(n) {}
 json_array::json_array(json_array &&arr) : parent_t(move(arr)) {}
 
 json_array::json_array(initializer_list<json_element> l) :

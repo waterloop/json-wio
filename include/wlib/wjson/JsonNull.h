@@ -1,19 +1,18 @@
-#ifndef __WLIB_JSON_JSONNULL_H__
-#define __WLIB_JSON_JSONNULL_H__
+#ifndef __JSON_NULL_H__
+#define __JSON_NULL_H__
 
 #include <wlib/wjson/JsonElement.h>
 
 namespace wlp {
     namespace json {
-        extern const json_element null;
+        json_element *null();
         namespace array {
-            extern const json_array null;
+            json_array *null();
         }
         namespace object {
-            extern const json_object null;
+            json_object *null();
         }
     }
 }
 
 #endif
-
