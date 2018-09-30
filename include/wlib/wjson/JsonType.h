@@ -99,7 +99,7 @@ namespace wlp {
     TYPE_INFO(TYPE_JSON_STRING, char *)
     TYPE_INFO(TYPE_JSON_STRING, dynamic_string)
 
-    template<size_type size>
+    template<size_t size>
     struct type_info<char[size]>
     { static constexpr json_type value = TYPE_JSON_STRING; };
 
@@ -112,7 +112,7 @@ namespace wlp {
 
     template<typename target_t>
     constexpr bool is_char_array() {
-        return is_array<target_t>::value && 
+        return is_array<target_t>::value &&
             is_same<typename remove_extent<target_t>::type,
             char>::value;
     }

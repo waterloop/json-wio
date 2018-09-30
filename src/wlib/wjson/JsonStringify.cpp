@@ -1,4 +1,5 @@
 #include "Internal.h"
+#include "Placement.h"
 
 #include <wlib/wjson/JsonStringify.h>
 #include <wlib/wjson/JsonElement.h>

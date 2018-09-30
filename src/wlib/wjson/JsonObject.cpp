@@ -4,7 +4,7 @@
 using namespace wlp;
 
 json_object::json_object(
-    json_object::size_type n,
+    size_t n,
     json_object::percent_type load) :
     parent_t(n, load) {}
 

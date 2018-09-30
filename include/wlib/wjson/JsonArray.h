@@ -1,6 +1,7 @@
 #ifndef __WLIB_JSON_JSONARRAY_H__
 #define __WLIB_JSON_JSONARRAY_H__
 
+#include <wlib/tuple>
 #include <wlib/array_list>
 #include <wlib/initializer_list>
 
@@ -21,7 +22,7 @@ namespace wlp {
 
     public:
         explicit json_array(
-            size_type n = DEFAULT_SIZE);
+            size_t n = DEFAULT_SIZE);
 
         json_array(json_array &&arr);
         json_array &operator=(json_array &&arr);
@@ -37,7 +38,7 @@ namespace wlp {
 
     public:
         template<typename val_t>
-        iterator insert(size_type i, val_t &&val)
+        iterator insert(size_t i, val_t &&val)
         { return parent_t::insert(i, json_element(forward<val_t>(val))); }
 
         template<typename val_t>
@@ -53,7 +54,7 @@ namespace wlp {
         { parent_t::push_front(json_element(forward<val_t>(val))); }
 
         template<typename val_t>
-        size_type index_of(val_t &&val) const
+        size_t index_of(val_t &&val) const
         { return parent_t::index_of(json_element(forward<val_t>(val)));  }
 
         template<typename val_t>

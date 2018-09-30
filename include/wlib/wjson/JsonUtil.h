@@ -1,7 +1,7 @@
 #ifndef __WLIB_JSON_JSONUTIL_H__
 #define __WLIB_JSON_JSONUTIL_H__
 
-#include <wlib/types>
+#include <stddef.h>
 
 #define STR_NULL    "null"
 #define STR_TRUE    "true"
@@ -19,7 +19,7 @@ namespace wlp {
     class json_element;
 
     struct json_element_hash {
-        size_type operator()(const json_element &je) const;
+        size_t operator()(const json_element &je) const;
     };
 
     struct json_element_equals {

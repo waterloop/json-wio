@@ -20,26 +20,22 @@ bool wlp::string_is_float(const char *str) {
 
 // functors
 namespace element_hash {
-    typedef size_type (*hash_function)(const json_element &);
-    static size_type of_null(const json_element &) { return 0; }
-    static size_type of_int(const json_element &je) {
-        return static_cast<size_type>(je.integer());
+    typedef size_t (*hash_function)(const json_element &);
+    static size_t of_null(const json_element &) { return 0; }
+    static size_t of_int(const json_element &je) {
+        return static_cast<size_t>(je.integer());
     }
-    static size_type of_float(const json_element &je) {
-        static_assert(
-            sizeof(json_float) >= sizeof(size_type),
-            "Expecting sizeof json_float to be at least sizeof wlp::size_type");
-
+    static size_t of_float(const json_element &je) {
         json_float floating = je.floating();
-        return *reinterpret_cast<size_type *>(&floating);
+        return *reinterpret_cast<size_t *>(&floating);
     }
-    static size_type of_str(const json_element &je) {
-        return hash_string<size_type>(je.string().c_str());
+    static size_t of_str(const json_element &je) {
+        return hash_string<size_t>(je.string().c_str());
     }
-    static size_type of_arr(const json_element &) {
+    static size_t of_arr(const json_element &) {
         return 0;
     }
-    static size_type of_obj(const json_element &) {
+    static size_t of_obj(const json_element &) {
         return 0;
     }
     static hash_function hashers[json_type::NUM_CLASS] = {
@@ -49,7 +45,7 @@ namespace element_hash {
     };
 }
 
-size_type json_element_hash::operator()(const json_element &je) const {
+size_t json_element_hash::operator()(const json_element &je) const {
     return element_hash::hashers[je.type() >> 4](je);
 }
 

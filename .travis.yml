@@ -15,9 +15,7 @@ addons:
       - valgrind
 
 install:
-  - curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
-  - sudo apt-get install -y nodejs
-  - sudo npm install -g wio@0.2.1 --unsafe-perm
+  - wget
   - sudo apt-get install -qq gcc-avr avr-libc avrdude -y
 
 script:

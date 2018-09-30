@@ -75,24 +75,24 @@ TEST(json_array, move_operator) {
 TEST(json_array, null_elements) {
     json_array arr;
 
-    constexpr size_type size = 10;
-    for (size_type i = 0; i < size; ++i) {
-        arr.push_back(json::null);
+    constexpr size_t size = 10;
+    for (size_t i = 0; i < size; ++i) {
+        arr.push_back(*json::null());
     }
 
     ASSERT_EQ(size, arr.size());
     ASSERT_FALSE(arr.empty());
 
-    for (size_type i = 0; i < size; ++i) {
-        ASSERT_EQ(json::null, arr[i]);
+    for (size_t i = 0; i < size; ++i) {
+        ASSERT_EQ(*json::null(), arr[i]);
     }
 }
 
 TEST(json_array, bool_elements) {
     json_array arr;
 
-    constexpr size_type size = 10;
-    for (size_type i = 0; i < size; ++i) {
+    constexpr size_t size = 10;
+    for (size_t i = 0; i < size; ++i) {
         arr.push_back(json_element(!(i % 2)));
     }
 
@@ -100,7 +100,7 @@ TEST(json_array, bool_elements) {
 
     json_element true_e(true);
     json_element false_e(false);
-    for (size_type i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         ASSERT_EQ(!(i % 2) ? true_e : false_e, arr[i]);
     }
 }

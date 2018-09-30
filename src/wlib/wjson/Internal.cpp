@@ -1,5 +1,6 @@
 #include "Internal.h"
 
+#include <wlib/new>
 #include <string.h>
 
 json_union::json_union() {}

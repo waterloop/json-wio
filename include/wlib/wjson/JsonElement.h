@@ -37,14 +37,14 @@ namespace wlp {
 
         // string type constructors
         json_element(char *str);
-        json_element(char *str, size_type size);
+        json_element(char *str, size_t size);
         json_element(const char *str);
-        json_element(const char *str, size_type size);
+        json_element(const char *str, size_t size);
         json_element(const dynamic_string &str);
         json_element(dynamic_string &&str);
 
         // static string
-        template<size_type string_size>
+        template<size_t string_size>
         json_element(const static_string<string_size> &str) :
             json_element(static_cast<const char*>(str.c_str()), str.length()) {}
 
@@ -81,7 +81,7 @@ namespace wlp {
     private:
         json_element &assign(json_int i, json_type type);
         json_element &assign(json_float f, json_type type);
-        json_element &assign(const char *str, size_type len);
+        json_element &assign(const char *str, size_t len);
 
     public:
         // string types
@@ -90,7 +90,7 @@ namespace wlp {
         json_element &operator=(const dynamic_string &str);
         json_element &operator=(dynamic_string &&str);
 
-        template<size_type string_size>
+        template<size_t string_size>
         json_element &operator=(const static_string<string_size> &str)
         { return assign(str.c_str(), str.length()); }
 
@@ -283,7 +283,7 @@ namespace wlp {
             is_same<char *, c_str_t>::value ||
             is_same<const char *, c_str_t>::value,
             json_element &>::type
-        operator[](c_str_t *str) 
+        operator[](c_str_t *str)
         { return access(static_cast<const char *>(str)); }
         template<typename c_str_t>
         typename enable_type_if<
@@ -300,8 +300,8 @@ namespace wlp {
         const json_element &operator[](const json_element &je) const;
 
         // size query for array and object types
-        size_type size() const;
-        size_type length() const;
+        size_t size() const;
+        size_t length() const;
 
     public:
         const json_int &integer() const;
