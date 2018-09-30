@@ -15,18 +15,20 @@ addons:
       - valgrind
 
 install:
-  - wget
+  - wget https://github.com/wio/wio/releases/download/v0.4.2/wio_linux_x86_64.tar.gz
+  - tar -xzvf wio_linux_x86_64.tar.gz
   - sudo apt-get install -qq gcc-avr avr-libc avrdude -y
 
 script:
   - gcc -v
   - g++ -v
   - cmake --version
-  - wio update pkg .
-  - wio pac get
+  - ./wio install
+  - ./wmake build
   - ./wmake test
   - cd cmake-build-debug
   - valgrind --leak-check=yes ./unit
   - cd ..
-  - wio build
+  - ./wio build --all
+  - ./wio run native-tests
 
