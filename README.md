@@ -4,7 +4,7 @@ JSON Library for WLib. Parse and stringify implemented without recursion, and su
 ### Install
 
 ```bash
-wio pac add wlib-json
+wio install wlib-json
 ```
 
 ### Usage
