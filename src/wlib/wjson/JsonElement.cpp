@@ -392,6 +392,12 @@ const json_element &json_element::access(const char *str) const {
     return m_object.at(str);
 }
 
+json_element &json_element::operator[](const char *str) {
+    if (!is_object())
+    { return const_cast<json_element &>(*json::null()); }
+    return m_object[str];
+}
+
 json_element &json_element::operator[](const dynamic_string &str) {
     if (!is_object())
     { return const_cast<json_element &>(*json::null()); }
