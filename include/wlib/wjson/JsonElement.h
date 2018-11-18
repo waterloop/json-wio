@@ -292,6 +292,8 @@ namespace wlp {
             const json_element &>::type
         operator[](c_str_t *str) const
         { return access(static_cast<const char *>(str)); }
+
+        json_element &operator[](const char *str);
         json_element &operator[](const dynamic_string &str);
         const json_element &operator[](const dynamic_string &str) const;
 
